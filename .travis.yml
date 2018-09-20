@@ -6,6 +6,8 @@ cache: pip
 
 services:
 - postgresql
+- rabbitmq  # required for aiida >= 1.0
+
 
 addons:
   postgresql: "9.5"
@@ -21,26 +23,59 @@ install:
 
 env:
   matrix:
-  - TEST_AIIDA_BACKEND: django
-    TEST_TYPE: tests
-  - TEST_AIIDA_BACKEND: sqlalchemy
-    TEST_TYPE: tests
-  - TEST_AIIDA_BACKEND: django
-    TEST_TYPE: docs
-    READTHEDOCS: 'True'
-  - TEST_AIIDA_BACKEND: django
-    TEST_TYPE: pre-commit
-    
-  # Remove this to enforce the AiiDA coding style
-  allow_failures: 
-  - TEST_AIIDA_BACKEND: django
-    TEST_TYPE: pre-commit
+    - TEST_TYPE: tests
+      TEST_AIIDA_BACKEND: django
+      MOCK_EXECUTABLES: true
+      PYPI_DEPLOY: true
+    - TEST_TYPE: tests
+      TEST_AIIDA_BACKEND: sqlalchemy
+      MOCK_EXECUTABLES: true
+    - TEST_TYPE: pre-commit
+    - TEST_TYPE: docs
+      READTHEDOCS: 'True'
+  # TODO for aiida v1 test pytest is failing on setup at present (dependency version clash?)
+    - TEST_TYPE="tests" AIIDA_BRANCH="develop" TEST_AIIDA_BACKEND="django" MOCK_EXECUTABLES=true
+    - TEST_TYPE="tests" AIIDA_BRANCH="develop" TEST_AIIDA_BACKEND="sqlalchemy" MOCK_EXECUTABLES=true
+
+matrix:
+  allow_failures:
+    - env: TEST_TYPE="tests" AIIDA_BRANCH="develop" TEST_AIIDA_BACKEND="django" MOCK_EXECUTABLES=true
+    - env: TEST_TYPE="tests" AIIDA_BRANCH="develop" TEST_AIIDA_BACKEND="sqlalchemy" MOCK_EXECUTABLES=true
+
+install:
+# Upgrade pip setuptools and wheel
+- pip install -U pip wheel setuptools
+- pip install -e .[pre-commit,testing,docs]
+- >
+  if [[ ! -z "${AIIDA_BRANCH}" ]]; then
+    cur_path="$(pwd)";
+    cd ..;
+    git clone --branch=${AIIDA_BRANCH} https://github.com/aiidateam/aiida_core.git;
+    cd aiida_core;
+    pip install -U -e .[testing];
+    cd "$cur_path";
+  fi
+- pip install coveralls
+
+before_script:
+- reentry scan
 
 script:
-- if [ "$TEST_TYPE" == "tests" ] ; then coverage run --append manage.py; fi  # runs unit tests
-- if [ "$TEST_TYPE" == "docs" ] ; then cd docs; make; fi  # creates documentation
-# runs precommit checks but doesn't fail if they don't pass
-- if [ "$TEST_TYPE" == "pre-commit" ] ; then pre-commit install; pre-commit run --all-files || ( git status --short; git diff ; exit 1 ); fi
+- >
+  if [[ "$TEST_TYPE" == "tests" ]]; then
+    if [[ ! -z "${AIIDA_BRANCH}" ]]; then
+      pytest -v aiida_crystal17 examples;
+    else
+      pytest -v --cov=aiida_crystal17 --cov=examples --cov-config .coveragerc --cov-report= aiida_crystal17 examples;
+    fi
+  fi
+- >
+  if [[ "$TEST_TYPE" == "pre-commit" ]]; then
+  pre-commit install;
+  pre-commit run --all-files || ( git status --short; git diff ; exit 1 ) ;
+  fi
+- if [[ "$TEST_TYPE" == "docs" ]]; then cd docs; make; fi
 
 after_success:
 - coveralls
+

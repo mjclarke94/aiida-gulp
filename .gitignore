@@ -7,3 +7,9 @@
 *.egg*
 .DS_Store
 .coverage
+.idea/
+.pytest_cache/
+.idea/vcs.xml
+postgres*.log
+.aiida_envs.yaml
+
