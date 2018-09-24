@@ -40,7 +40,7 @@ class OptCalculation(BaseCalculation):
 
         :type parameters: dict
         :returns: list of strings
-        :rtype: list
+        :rtype: list(str)
         """
         # KeyWord HEADER
         # NB: main output control:
@@ -66,7 +66,7 @@ class OptCalculation(BaseCalculation):
 
         :type parameters: dict
         :returns: list of strings
-        :rtype: list
+        :rtype: list(str)
         """
         lines = []
 

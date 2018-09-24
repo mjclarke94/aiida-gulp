@@ -32,7 +32,7 @@ class SingleCalculation(BaseCalculation):
 
         :type parameters: dict
         :returns: list of strings
-        :rtype: list
+        :rtype: list(str)
         """
         # KeyWord HEADER
         # NB: main output control:
@@ -50,7 +50,7 @@ class SingleCalculation(BaseCalculation):
 
         :type parameters: dict
         :returns: list of strings
-        :rtype: list
+        :rtype: list(str)
         """
         return []
 
@@ -58,6 +58,6 @@ class SingleCalculation(BaseCalculation):
         """ get list of external output commands for .gin
 
         :returns: list of strings
-        :rtype: list
+        :rtype: list(str)
         """
         return []
