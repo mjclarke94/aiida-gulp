@@ -6,7 +6,8 @@ def get_potential_lines(potential, structure):
 
     :type potential: dict
     :type structure: aiida.orm.data.structure.StructureData
-    :rtype: list of str
+    :returns: list of strings
+    :rtype: list
     """
     symbols = [site.symbol for site in structure.kinds]
     pair_style = potential['pair_style']

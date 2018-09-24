@@ -39,7 +39,8 @@ class OptCalculation(BaseCalculation):
         """ get list of input keywords
 
         :type parameters: dict
-        :rtype: list of str
+        :returns: list of strings
+        :rtype: list
         """
         # KeyWord HEADER
         # NB: main output control:
@@ -64,7 +65,8 @@ class OptCalculation(BaseCalculation):
         """ get list of other option lines for .gin
 
         :type parameters: dict
-        :rtype: list of str
+        :returns: list of strings
+        :rtype: list
         """
         lines = []
 

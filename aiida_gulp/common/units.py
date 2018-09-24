@@ -152,7 +152,7 @@ def get_units_dict(style, quantities):
     :param style: the unit style set in the lammps input
     :type style: str
     :param quantities: the quantities to get units for
-    :type quantities: list of str
+    :type quantities: list
     :return:
     """
     out_dict = {}

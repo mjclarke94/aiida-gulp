@@ -160,7 +160,8 @@ class BaseCalculation(JobCalculation):
         """ get list of input keywords for .gin
 
         :type parameters: dict
-        :rtype: list of str
+        :returns: list of strings
+        :rtype: list
         """
         raise NotImplementedError
 
@@ -168,8 +169,8 @@ class BaseCalculation(JobCalculation):
         """ get list of geometry lines for .gin
 
         :type instruct: aiida.orm.data.structure.StructureData
-        :type symmetry: dict
-        :rtype: list of str
+        :returns: list of strings
+        :rtype: list
         """
         lines = ['name main-geometry']
 
@@ -234,7 +235,8 @@ class BaseCalculation(JobCalculation):
 
         :type potential: dict
         :type structure: aiida.orm.data.structure.StructureData
-        :rtype: list of str
+        :returns: list of strings
+        :rtype: list
         """
         return get_potential_lines(potential, structure)
 
@@ -243,14 +245,16 @@ class BaseCalculation(JobCalculation):
         """ get list of other option lines for .gin
 
         :type parameters: dict
-        :rtype: list of str
+        :returns: list of strings
+        :rtype: list
         """
         raise NotImplementedError
 
     def get_external_output_lines(self):
         """ get list of external output commands for .gin
 
-        :rtype: list of str
+        :returns: list of strings
+        :rtype: list
         """
         return [
             'output cif {}'.format(
