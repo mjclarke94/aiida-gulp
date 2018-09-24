@@ -11,10 +11,12 @@
     "version": "0.1.0a0",
     "entry_points": {
         "aiida.calculations": [
-            "gulp.optimize = aiida_gulp.calculations.optimize:OptCalculation"
+            "gulp.optimize = aiida_gulp.calculations.optimize:OptCalculation",
+            "gulp.single = aiida_gulp.calculations.single:SingleCalculation"
         ],
         "aiida.parsers": [
-            "gulp.optimize = aiida_gulp.parsers.optimize:OptParser"
+            "gulp.optimize = aiida_gulp.parsers.optimize:OptParser",
+            "gulp.single = aiida_gulp.parsers.single:SingleParser"
         ]
     },
     "setup_requires": ["reentry"],

@@ -1,4 +1,5 @@
 import os
+from jsonextended import edict
 
 from aiida_gulp.tests import TEST_DIR
 from aiida_gulp.parsers.reaxff_convert import read_reaxff_file, write_gulp, write_lammps
@@ -9,10 +10,18 @@ def test_parse():
     fpath = os.path.join(TEST_DIR, 'input_files', 'FeCrOSCH.reaxff')
     data = read_reaxff_file(fpath)
 
-    print(data)
+    # print(data)
+    exp_data = {}
 
-    assert data['descript'] == "Reactive MD-force field: Cr/O/Fe/S/C/H force field 2014"
-    assert data['params'] == {'Overcoordination 1': 50.0, 'Torsion/BO': 5.7796, 'Overcoordination 2': 9.5469,
+    exp_data["tolerances"] = {
+        "anglemin": 0.001,
+    "angleprod": 0.000001,
+    "hbondmin": 0.01,
+    "hbonddist": 7.5,
+    "torsionprod": 0.000000001  # NB: needs to be lower to get comparable energy to lammps, but then won't optimize
+    }
+    exp_data['descript'] = "Reactive MD-force field: Cr/O/Fe/S/C/H force field 2014"
+    exp_data['params'] = {'Overcoordination 1': 50.0, 'Torsion/BO': 5.7796, 'Overcoordination 2': 9.5469,
                               'Lower Taper-radius': 0.0, 'Valency overcoordination 1': 0.6991,
                               'Valency overcoordination 2': 50.0, 'Conjugation': 2.1645, 'Double bond/angle': 6.929,
                               'Triple bond stabilisation': 4.6, 'Valency undercoordination': 33.8667,
@@ -30,7 +39,7 @@ def test_parse():
                               'Not used 7': 5.0,
                               'Undercoordination 1': 1.0588, 'Undercoordination 2': 12.1176, 'Not used 3': -2.4837}
 
-    assert data['species'] == {'reaxff1_over4': [-2.8983, -19.4571, -3.55, -16.0573, -15.7363, -11.1953, -11.0],
+    exp_data['species'] = {'reaxff1_over4': [-2.8983, -19.4571, -3.55, -16.0573, -15.7363, -11.1953, -11.0],
                                'reaxff1_over3': [13.5366, 0.0003, 0.0021, 0.759, 15.323, 0.759, 0.669],
                                'reaxff1_over2': [8.9539, 3.0408, 3.5027, 25.343, 12.0, 25.343, 8.741],
                                'reaxff1_over1': [34.9289, 2.4197, 0.764, 10.126, 22.1978, 10.126, 13.364],
@@ -66,7 +75,7 @@ def test_parse():
                                'mass': [12.0, 1.008, 15.999, 55.845, 32.06, 51.9962, 1.008],
                                'reaxff1_lonepair1': [0.0, 0.0, 2.0, 0.0, 2.0, 0.0, 2.0]}
 
-    assert data['bonds'] == {
+    exp_data['bonds'] = {
         'reaxff2_bo3': [-0.1, 1.0, 1.0, -0.2288, 1.0, -0.1055, -0.35, 1.0, -0.35, -0.2, -0.1016, 1.0, -0.3341, -0.1838,
                         -0.1677, -0.35, -0.35, -0.2339, -0.3, -0.2, -0.35],
         'reaxff2_bo2': [6.7268, 6.9136, 6.0552, 4.8734, 4.279, 5.5, 4.1708, 5.4965, 7.1208, 6.8013, 5.5813, 5.0961,
@@ -101,7 +110,7 @@ def test_parse():
                    1.0],
         'reaxff2_bo9': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                         0.0, 0.0]}
-    assert data['off-diagonals'] == {
+    exp_data['off-diagonals'] = {
         'reaxff2_morse1': [0.1239, 0.1345, 0.0283, 0.4204, 0.02, 0.1, 0.3314, 0.102, 0.2832, 0.0854, 0.1, 0.0582,
                            0.2523,
                            0.3236, 0.1],
@@ -118,11 +127,11 @@ def test_parse():
         'reaxff2_morse6': [-1.0, 1.0637, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0],
         'idx2': [2, 3, 3, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 6],
         'idx1': [1, 1, 2, 1, 2, 3, 1, 2, 3, 4, 2, 3, 5, 4, 1]}
-    assert data['hbonds'] == {'reaxff3_hbond1': [2.12, 2.5, 2.5, 2.5], 'reaxff3_hbond3': [1.45, 1.45, 1.45, 1.45],
+    exp_data['hbonds'] = {'reaxff3_hbond1': [2.12, 2.5, 2.5, 2.5], 'reaxff3_hbond3': [1.45, 1.45, 1.45, 1.45],
                               'reaxff3_hbond2': [-3.58, -1.0, -1.0, -2.0], 'reaxff3_hbond4': [19.5, 19.5, 19.5, 19.5],
                               'idx3': [3, 5, 3, 5],
                               'idx1': [3, 3, 5, 5], 'idx2': [2, 2, 2, 2]}
-    assert data['torsions'] == {
+    exp_data['torsions'] = {
         'dummy2': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                    0.0,
                    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
@@ -171,7 +180,7 @@ def test_parse():
                  3, 1,
                  2,
                  2]}
-    assert data['angles'] == {
+    exp_data['angles'] = {
         'reaxff3_penalty': [6.2933, 0.0, 0.0, 0.0, 0.0, 0.0, 58.6562, -50.0, 0.0, 68.1072, 50.0, 0.0, 0.0, 0.0, 0.0,
                             0.0,
                             0.0,
@@ -323,6 +332,13 @@ def test_parse():
                  2,
                  2, 6, 1, 5, 6, 1, 6, 5, 2]}
 
+    assert edict.diff(data, exp_data, np_allclose=True) == {}
+
+
+def test_write_gulp():
+    fpath = os.path.join(TEST_DIR, 'input_files', 'FeCrOSCH.reaxff')
+    data = read_reaxff_file(fpath)
+
     expected = """#
 #  ReaxFF force field
 #
@@ -342,7 +358,7 @@ reaxFFqcutoff        10.0000
 #
 #  Bond order threshold - check anglemin as this is cutof2 given in control file
 #
-reaxFFtol       0.0010000000 0.001 0.000001 0.01 7.5 0.000000001
+reaxFFtol  0.0010000000 0.0010000000 0.0000010000 0.0100000000 7.5000000000 0.0000000010
 #
 #  Species independent parameters 
 #
@@ -358,7 +374,7 @@ reaxff0_lonepair     6.089100
 #
 reaxff1_radii 
 Fe core   1.9029  -1.6836  -1.2000 
-S  core   1.8328   1.6468   1.0000 
+S  core   1.8328   1.6468   0.0000 
 reaxff1_valence 
 Fe core   3.0000   6.0000   3.0000   3.0000 
 S  core   2.0000   6.2998   6.0000   4.0000 
@@ -433,6 +449,12 @@ S  core S  core S  core S  core   2.4661  71.9719   0.0100  -8.0000   0.0000
 """
 
     assert write_gulp(data, species_filter=['Fe', 'S']) == expected
+
+
+def test_write_lammps():
+
+    fpath = os.path.join(TEST_DIR, 'input_files', 'FeCrOSCH.reaxff')
+    data = read_reaxff_file(fpath)
 
     expected2 = """Reactive MD-force field: Cr/O/Fe/S/C/H force field 2014
 39 ! Number of general parameters

@@ -2,6 +2,8 @@ import glob
 import os
 
 import pytest
+import sys
+from aiida_gulp.common.compatibility import aiida_version, cmp_version, run_get_node
 
 from aiida_gulp.tests import TEST_DIR
 import aiida_gulp.tests.utils as tests
@@ -34,12 +36,17 @@ def reaxff_data():
                    "symbols": symbols,
                    "scaled_positions": scaled_positions}
 
-    reaxff_path = os.path.join(TEST_DIR, 'input_files', 'FeCrOSCH.reaxff')
+    reaxff_path = os.path.join(TEST_DIR, 'input_files', 'FeCrOSCH.reaxff',)
 
-    potential_dict = {'pair_style': 'reaxff', 'data': read_reaxff_file(reaxff_path)}
+    potential_dict = {'pair_style': 'reaxff',
+                      'data': read_reaxff_file(reaxff_path)}
 
     output_dict = {"units": "real",
-                   "energy": -1030.3543,
+                   # in lammps -1027.9739 kcal/mole = -4301.0427976 kJ/mole = -44.577166 eV
+                   # in gulp, with standard tolerances, -42.20546311 eV
+                   # with a lower torsioprod tolerance (0.001), -44.57768894 eV
+                   "initial_energy": -42.20546311,
+                   "final_energy": -43.56745651,
                    "infiles": ['main.gin'],
                    "warnings": []}
 
@@ -62,7 +69,12 @@ def setup_calc(workdir, configure, struct_dict, potential_dict, ctype, units):
 
     potential = ParameterData(dict=potential_dict)
 
-    if ctype == "optimisation":
+    if ctype == "single":
+        parameters_opt = {
+            'title': 'the title',  # optional
+        }
+        plugin_name = 'gulp.single'
+    elif ctype == "optimisation":
         # parameters_opt = {
         #     'units': units,
         #     'relax': {
@@ -128,6 +140,35 @@ def setup_calc(workdir, configure, struct_dict, potential_dict, ctype, units):
 @pytest.mark.parametrize('data_func', [
     reaxff_data,
 ])
+def test_single_submission(new_database, new_workdir, data_func):
+    struct_dict, potential_dict, output_dict = data_func()
+
+    calc, input_dict = setup_calc(new_workdir, False,
+                                  struct_dict, potential_dict, 'single',
+                                  output_dict['units'])
+
+    from aiida.common.folders import SandboxFolder
+
+    # output input files and scripts to temporary folder
+    with SandboxFolder() as folder:
+        subfolder, script_filename = calc.submit_test(folder=folder)
+        print("inputs created successfully at {}".format(subfolder.abspath))
+        print([
+            os.path.basename(p)
+            for p in glob.glob(os.path.join(subfolder.abspath, "*"))
+        ])
+        for infile in output_dict['infiles']:
+            assert subfolder.isfile(infile)
+            print('---')
+            print(infile)
+            print('---')
+            with subfolder.open(infile) as f:
+                print(f.read())
+
+
+@pytest.mark.parametrize('data_func', [
+    reaxff_data,
+])
 def test_opt_submission(new_database, new_workdir, data_func):
     struct_dict, potential_dict, output_dict = data_func()
 
@@ -152,3 +193,84 @@ def test_opt_submission(new_database, new_workdir, data_func):
             print('---')
             with subfolder.open(infile) as f:
                 print(f.read())
+
+
+@pytest.mark.lammps_call
+@pytest.mark.timeout(120)
+@pytest.mark.skipif(
+    aiida_version() < cmp_version('1.0.0a1') and tests.is_sqla_backend(),
+    reason='Error in obtaining authinfo for computer configuration')
+@pytest.mark.parametrize('data_func', [
+    reaxff_data,
+])
+def test_single_process(new_database_with_daemon, new_workdir, data_func):
+    struct_dict, potential_dict, output_dict = data_func()
+
+    calc, input_dict = setup_calc(new_workdir, True,
+                                  struct_dict, potential_dict, 'single',
+                                  output_dict['units'])
+
+    process = calc.process()
+
+    calcnode = run_get_node(process, input_dict)
+
+    sys.stdout.write(tests.get_calc_log(calcnode))
+
+    print(calcnode.get_inputs_dict())
+    assert set(calcnode.get_inputs_dict().keys()).issuperset(
+        ['parameters', 'structure', 'potential'])
+
+    print(calcnode.get_outputs_dict())
+    assert set(calcnode.get_outputs_dict().keys()).issuperset(
+        ['output_parameters'])
+
+    from aiida.common.datastructures import calc_states
+    assert calcnode.get_state() == calc_states.FINISHED
+
+    pdict = calcnode.out.output_parameters.get_dict()
+    print(pdict)
+    assert set(pdict.keys()).issuperset(
+        ['energy', 'warnings', 'energy_units', 'parser_class', 'parser_version'])
+    assert pdict['warnings'] == output_dict["warnings"]
+    assert pdict['energy'] == pytest.approx(output_dict['initial_energy'])
+
+
+@pytest.mark.lammps_call
+@pytest.mark.timeout(120)
+@pytest.mark.skipif(
+    aiida_version() < cmp_version('1.0.0a1') and tests.is_sqla_backend(),
+    reason='Error in obtaining authinfo for computer configuration')
+@pytest.mark.parametrize('data_func', [
+    reaxff_data,
+])
+def test_opt_process(new_database_with_daemon, new_workdir, data_func):
+    struct_dict, potential_dict, output_dict = data_func()
+
+    calc, input_dict = setup_calc(new_workdir, True,
+                                  struct_dict, potential_dict, 'optimisation',
+                                  output_dict['units'])
+
+    process = calc.process()
+
+    calcnode = run_get_node(process, input_dict)
+
+    sys.stdout.write(tests.get_calc_log(calcnode))
+
+    print(calcnode.get_inputs_dict())
+    assert set(calcnode.get_inputs_dict().keys()).issuperset(
+        ['parameters', 'structure', 'potential'])
+
+    print(calcnode.get_outputs_dict())
+    assert set(calcnode.get_outputs_dict().keys()).issuperset(
+        ['output_parameters', 'output_structure'])
+
+    from aiida.common.datastructures import calc_states
+    assert calcnode.get_state() == calc_states.FINISHED
+
+    pdict = calcnode.out.output_parameters.get_dict()
+    print(pdict)
+    assert set(pdict.keys()).issuperset(
+        ['energy', 'warnings', 'energy_units', 'parser_class', 'parser_version'])
+    assert pdict['warnings'] == output_dict["warnings"]
+    assert pdict['energy_initial'] == pytest.approx(output_dict['initial_energy'])
+    assert pdict['energy'] == pytest.approx(output_dict['final_energy'])

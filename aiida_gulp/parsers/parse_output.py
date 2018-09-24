@@ -1,8 +1,14 @@
 from aiida_gulp import __version__
 
 
-def parse_output(main_path, parser_class):
+def parse_output(main_path, parser_class, final=False):
+    """
 
+    :type main_path: str
+    :type parser_class: str
+    :param final: whether to expect 'final' data
+    :rtype: (bool, dict)
+    """
     psuccess = True
     data = {
         'parser_errors': [],
@@ -22,6 +28,27 @@ def parse_output(main_path, parser_class):
 
     if data['errors']:
         psuccess = False
+
+    idata = None
+    fdata = None
+    if "initial" in data:
+        idata = data.pop('initial')
+    else:
+        data['parser_errors'].append("expected 'initial' data")
+        psuccess = False
+    if 'final' in data:
+        fdata = data.pop('final')
+    elif final:
+        data['parser_errors'].append("expected 'final' data")
+        psuccess = False
+
+    if final:
+        if idata:
+            data['energy_initial'] = idata['lattice_energy']['primitive']
+        if fdata:
+            data['energy'] = fdata['lattice_energy']['primitive']
+    elif idata:
+        data['energy'] = idata['lattice_energy']['primitive']
 
     return psuccess, data
 

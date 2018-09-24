@@ -33,8 +33,8 @@ class BaseCalculation(JobCalculation):
         self._DEFAULT_INPUT_FILE = 'main.gin'
         self._DEFAULT_OUTPUT_FILE = 'main.gout'
         self._DEFAULT_CIF_FILE = 'main.cif'
-        self._DEFAULT_STR_FILE = 'main.cif'
-        self._retrieve_list = ('main.cif', 'main.str')
+        self._DEFAULT_STR_FILE = 'main.str'
+        self._retrieve_list = ('main.gout', 'main.cif', 'main.str')
         self._retrieve_temporary_list = ()
 
         # parser entry point defined in setup.json
@@ -237,7 +237,7 @@ class BaseCalculation(JobCalculation):
         codeinfo.cmdline_params = [
             os.path.splitext(self._DEFAULT_INPUT_FILE)[0]
         ]
-        codeinfo.stdout_name = self._DEFAULT_OUTPUT_FILE
+        # codeinfo.stdout_name =
         codeinfo.withmpi = self.get_withmpi()
 
         # Prepare CalcInfo object for aiida

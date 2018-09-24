@@ -1,4 +1,4 @@
-optimise verb operators conp cg
+verb operators
 
 title
 the title
@@ -134,9 +134,7 @@ reaxff4_torsion kcal
 S  core S  core S  core S  core   2.4661  71.9719   0.0100  -8.0000   0.0000
 
 # Other Options
-maxcyc opt 50000
 
 
 # External Outputs
-output cif main
-output str main
+

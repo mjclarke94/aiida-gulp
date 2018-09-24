@@ -1,4 +1,4 @@
-optimise verb operators conp cg
+verb operators
 
 title
 the title
@@ -44,7 +44,7 @@ reaxFFqcutoff        10.0000
 #
 #  Bond order threshold - check anglemin as this is cutof2 given in control file
 #
-reaxFFtol  0.0010000000 0.0010000000 0.0000010000 0.0100000000 7.5000000000 0.0000000010
+reaxFFtol       0.0010000000 0.001 0.000001 0.01 7.5 0.001
 #
 #  Species independent parameters
 #
@@ -133,10 +133,5 @@ S  core Fe core S  core   0.0000
 reaxff4_torsion kcal
 S  core S  core S  core S  core   2.4661  71.9719   0.0100  -8.0000   0.0000
 
-# Other Options
-maxcyc opt 50000
-
 
 # External Outputs
-output cif main
-output str main

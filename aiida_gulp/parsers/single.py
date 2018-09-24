@@ -10,7 +10,7 @@ from aiida.common.datastructures import calc_states
 from aiida_gulp.parsers.parse_output import parse_output
 
 
-class OptParser(Parser):
+class SingleParser(Parser):
     """
     Parser class for parsing output of a standard GULP run
     """
@@ -20,11 +20,11 @@ class OptParser(Parser):
         """
         # check for valid input
         if not isinstance(calculation,
-                          CalculationFactory('gulp.optimize')):
+                          CalculationFactory('gulp.single')):
             raise OutputParsingError(
-                "Can only parse gulp.optimize calculation")
+                "Can only parse gulp.single calculation")
 
-        super(OptParser, self).__init__(calculation)
+        super(SingleParser, self).__init__(calculation)
 
     # pylint: disable=protected-access
     def check_state(self):
@@ -64,7 +64,6 @@ class OptParser(Parser):
           * ``node_list``: list of new nodes to be stored in the db
             (as a list of tuples ``(link_name, node)``)
         """
-        CifData = DataFactory('cif')
         ParameterData = DataFactory('parameter')
 
         node_list = []
@@ -82,7 +81,6 @@ class OptParser(Parser):
 
         # Check that the required files are present
         mainout_file = self._calc._DEFAULT_OUTPUT_FILE  # pylint: disable=protected-access
-        outcif_file = self._calc._DEFAULT_CIF_FILE  # pylint: disable=protected-access
 
         if mainout_file not in list_of_files:
             self.logger.error(
@@ -95,7 +93,7 @@ class OptParser(Parser):
         psuccess, outparams = parse_output(
             out_folder.get_abs_path(mainout_file),
             parser_class=self.__class__.__name__,
-            final=True)
+            final=False)
 
         if not psuccess:
             successful = False
@@ -106,18 +104,6 @@ class OptParser(Parser):
             self.logger.warning(
                 "the parser raised the following errors:\n{}".format(
                     "\n\t".join(perrors)))
-
-        if outcif_file not in list_of_files:
-            pass
-            # msg = "The output cif file '{}' was not found but is required".format(outcif_file)
-            # self.logger.error(msg)
-            # outparams['parser_errors'].append(msg)
-            # successful = False
-        else:
-            cif = CifData(file=out_folder.get_abs_path(outcif_file))
-            structure = cif._get_aiida_structure(primitive_cell=False)
-            node_list.append((self.get_linkname_outstructure(),
-                              structure))
 
         node_list.insert(0, (self.get_linkname_outparams(),
                              ParameterData(dict=outparams)))

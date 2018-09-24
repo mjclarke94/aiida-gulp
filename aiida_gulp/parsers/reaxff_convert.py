@@ -144,8 +144,31 @@ _torkeys = ['idx1', 'idx2', 'idx3', 'idx4',
 _hbkeys = ['idx1', 'idx2', 'idx3',
            'reaxff3_hbond1', 'reaxff3_hbond2', 'reaxff3_hbond3', 'reaxff3_hbond4']
 
+_tolerance_defaults = {
+    "anglemin": 0.001,
+    "angleprod": 0.000001,
+    "hbondmin": 0.01,
+    "hbonddist": 7.5,
+    "torsionprod": 0.000000001  # NB: needs to be lower to get comparable energy to lammps, but then won't optimize
+}
 
-def read_reaxff_file(inpath):
+
+def read_reaxff_file(inpath, reaxfftol=None):
+    """
+
+    :param inpath: path to reaxff file (in standard (lammps) format)
+    :param reaxfftol: additional tolerance parameters
+    :return:
+    """
+
+    reaxfftol = {} if reaxfftol is None else reaxfftol.copy()
+    toldict = {}
+    for key, val in _tolerance_defaults.items():
+        if key in reaxfftol:
+            toldict[key] = reaxfftol[key]
+        else:
+            toldict[key] = val
+
     with open(inpath, 'r') as f:
         # Descript Initial Line
         descript = f.readline()
@@ -270,6 +293,7 @@ def read_reaxff_file(inpath):
 
         return {
             "descript": descript.strip(),
+            "tolerances": toldict,
             "params": reaxff_par,
             "species": spec_dict,  # spec_df.reset_index().to_dict(orient='list'),
             "bonds": bond_dict,  # bond_df.reset_index().to_dict(orient='list'),
@@ -369,6 +393,7 @@ def write_gulp(data, species_filter=None):
     """
     data = copy.deepcopy(data)
 
+    tol_par = data["tolerances"]
     reaxff_par = data["params"]
     id_sym_dict = {k: v for k, v in zip(data["species"]['idx'], data["species"]['symbol'])}
     spec_df = data["species"]
@@ -395,6 +420,13 @@ def write_gulp(data, species_filter=None):
         return 0.0 if val < 0.0 else val
 
     bond_df['reaxff2_bo5'] = [gulp_conv2(i) for i in bond_df["reaxff2_bo5"]]
+
+    # TODO, this wasn't part of the original script, and should be better understood
+    # but without it, the energies greatly differ to LAMMPS (approx equal otherwise)
+    def gulp_conv3(val):
+        return 0.0 if val > 0.0 else val
+
+    spec_df['reaxff1_radii3'] = [gulp_conv3(i) for i in spec_df['reaxff1_radii3']]
 
     spec_df = [AttrDict({k: v[i] for k, v in spec_df.items()})
                for i in range(len(spec_df['idxs']))]
@@ -464,9 +496,9 @@ def write_gulp(data, species_filter=None):
     outstr += "#\n"
     outstr += "#  Bond order threshold - check anglemin as this is cutof2 given in control file\n"
     outstr += "#\n"
-    outstr += ("reaxFFtol       {:12.10f} 0.001 0.000001 0.01 7.5 0.000000001\n".format(0.01 * reaxff_par['bond order cutoff']))
-    # TODO other variables of reaxFFtol  0.001 0.001 0.000001 0.01 7.5 0.000000001
-    #                         reaxfftol bomin <anglemin> <angleprod> <hbondmin> <hbonddist> <torsionprod>
+    outstr += ( "reaxFFtol  {:12.10f} {:12.10f} {:12.10f} {:12.10f} {:12.10f} {:12.10f}\n".format(
+        0.01 * reaxff_par['bond order cutoff'],
+        *[tol_par[s] for s in "anglemin angleprod hbondmin hbonddist torsionprod".split()]))
     outstr += "#\n"
     outstr += "#  Species independent parameters \n"
     outstr += "#\n"
@@ -500,7 +532,7 @@ def write_gulp(data, species_filter=None):
     outstr += "#  Species parameters \n"
     outstr += "#\n"
     outstr += write_data('reaxff1_radii', spec_df, ['reaxff1_radii1', 'reaxff1_radii2', 'reaxff1_radii3'])
-    # TODO only mirrors lammps if (for S) S  core   1.8328   1.6468   1.0000 - > S  core   1.8328   1.6468   -1.0000
+
     outstr += write_data('reaxff1_valence', spec_df,
                          ['reaxff1_valence1', 'reaxff1_valence2', 'reaxff1_valence3', 'reaxff1_valence4'])
     outstr += write_data('reaxff1_over', spec_df, ['reaxff1_over1', 'reaxff1_over2', 'reaxff1_over3', 'reaxff1_over4'])
