@@ -24,18 +24,14 @@ def readnumline(f, vtype):
 def split_numbers(string, as_decimal=False):
     """ get a list of numbers from a string (even with no spacing)
 
-    Parameters
-    ----------
-    string: str
-    as_decimal: bool
-        if True return floats as decimal.Decimal objects
+    :type string: str
+    :type as_decimal: bool
+    :param as_decimal: if True return floats as decimal.Decimal objects
 
-    Returns
-    --------
-    float_list: List
+    :rtype: list
 
-    Examples
-    --------
+    :Example:
+
     >>> split_numbers("1")
     [1.0]
 

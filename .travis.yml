@@ -64,9 +64,9 @@ script:
 - >
   if [[ "$TEST_TYPE" == "tests" ]]; then
     if [[ ! -z "${AIIDA_BRANCH}" ]]; then
-      pytest -v aiida_gulp examples;
+      pytest -v aiida_gulp;
     else
-      pytest -v --cov=aiida_gulp --cov=examples --cov-config .coveragerc --cov-report= aiida_gulp examples;
+      pytest -v --cov=aiida_gulp --cov-config .coveragerc --cov-report= aiida_gulp;
     fi
   fi
 - >
