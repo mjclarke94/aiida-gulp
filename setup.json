@@ -30,6 +30,7 @@
         "six",
         "jsonextended",
         "jsonschema",
+        "spglib",
         "ase"
     ],
     "extras_require": {

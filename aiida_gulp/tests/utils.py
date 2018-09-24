@@ -182,9 +182,8 @@ def configure_computer_v012(computer, user_email=None, authparams=None):
                   old_authparams.keys())))
 
     if set(authparams.keys()) != set(valid_keys):
-        raise ValueError(
-            "new_authparams should contain only the keys: {}".format(
-                valid_keys))
+        raise ValueError("new_authparams should contain only the keys: {}".
+                         format(valid_keys))
 
     # convert keys from strings
     transport_members = dict(inspect.getmembers(transport))

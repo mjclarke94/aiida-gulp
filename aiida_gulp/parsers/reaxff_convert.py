@@ -319,8 +319,8 @@ def _read_hbond_info(f):
         hbond_values.append([species1, species2, species3] + values)
         if len(hbond_values[i]) != len(_hbkeys):
             raise Exception(
-                'number of values different than expected for hbond {0},{1},{2}'.
-                format(species1, species2, species3))
+                'number of values different than expected for hbond {0},{1},{2}'
+                .format(species1, species2, species3))
     # hbond_df = pd.DataFrame(hbond_values, columns=hbkey).set_index(['idx1', 'idx2', 'idx3'])
     hbond_dict = {k: v for k, v in zip(_hbkeys, transpose(hbond_values))}
     return hbond_dict
@@ -650,8 +650,8 @@ def _write_header(descript, outstr, reaxff_par, species_filter, tol_par):
     outstr += "#  Bond order threshold - check anglemin as this is cutof2 given in control file\n"
     outstr += "#\n"
     outstr += (
-        "reaxFFtol  {:12.10f} {:12.10f} {:12.10f} {:12.10f} {:12.10f} {:12.10f}\n".
-        format(
+        "reaxFFtol  {:12.10f} {:12.10f} {:12.10f} {:12.10f} {:12.10f} {:12.10f}\n"
+        .format(
             0.01 * reaxff_par['bond order cutoff'], *[
                 tol_par[s] for s in
                 "anglemin angleprod hbondmin hbonddist torsionprod".split()

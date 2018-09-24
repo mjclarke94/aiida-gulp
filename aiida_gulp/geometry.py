@@ -343,15 +343,15 @@ def cart2frac(lattice, ccoords):
     fcoords = []
     det_latt_tr = np.linalg.det(latt_tr)
     for i in ccoords:
-        a = (det3([[i[0], latt_tr[0][1], latt_tr[0][2]], [
-            i[1], latt_tr[1][1], latt_tr[1][2]
-        ], [i[2], latt_tr[2][1], latt_tr[2][2]]])) / det_latt_tr
-        b = (det3([[latt_tr[0][0], i[0], latt_tr[0][2]], [
-            latt_tr[1][0], i[1], latt_tr[1][2]
-        ], [latt_tr[2][0], i[2], latt_tr[2][2]]])) / det_latt_tr
-        c = (det3([[latt_tr[0][0], latt_tr[0][1], i[0]], [
-            latt_tr[1][0], latt_tr[1][1], i[1]
-        ], [latt_tr[2][0], latt_tr[2][1], i[2]]])) / det_latt_tr
+        a = (det3([[i[0], latt_tr[0][1], latt_tr[0][2]],
+                   [i[1], latt_tr[1][1], latt_tr[1][2]],
+                   [i[2], latt_tr[2][1], latt_tr[2][2]]])) / det_latt_tr
+        b = (det3([[latt_tr[0][0], i[0], latt_tr[0][2]],
+                   [latt_tr[1][0], i[1], latt_tr[1][2]],
+                   [latt_tr[2][0], i[2], latt_tr[2][2]]])) / det_latt_tr
+        c = (det3([[latt_tr[0][0], latt_tr[0][1], i[0]],
+                   [latt_tr[1][0], latt_tr[1][1], i[1]],
+                   [latt_tr[2][0], latt_tr[2][1], i[2]]])) / det_latt_tr
         fcoords.append([a, b, c])
     return fcoords
 
@@ -475,8 +475,7 @@ def compute_symmetry_3d(structdata,
     if symm_dataset is None:
         # TODO option to use P1 symmetry if can't find symmetry
         raise ValueError("could not find symmetry of cell: {}".format(cell))
-    sg_num = symm_dataset[
-        'number'] if symm_dataset['number'] is not None else 1
+    sg_num = symm_dataset['number'] if symm_dataset['number'] is not None else 1
     crystal_type = get_crystal_system(sg_num, as_number=True)
 
     # format the symmetry operations (fractional to cartesian)
