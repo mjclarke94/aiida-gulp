@@ -38,7 +38,7 @@ class BaseCalculation(JobCalculation):
         self._DEFAULT_OUTPUT_FILE = 'main.gout'
         self._DEFAULT_CIF_FILE = 'main.cif'
         self._DEFAULT_STR_FILE = 'main.str'
-        self._retrieve_list = ('main.gout', 'main.cif', 'main.str')
+        self._retrieve_list = ('main.gout', 'main.cif')
         self._retrieve_temporary_list = ()
 
         # parser entry point defined in setup.json
@@ -146,6 +146,9 @@ class BaseCalculation(JobCalculation):
         filecontent += "\n\n# External Outputs\n"
         filecontent += "\n".join(self.get_external_output_lines())
 
+        filecontent += "\n"
+        filecontent += "#---END---"
+
         with open(tempfolder.get_abs_path(self._DEFAULT_INPUT_FILE), 'w') as f:
             f.write(filecontent)
 
@@ -252,8 +255,8 @@ class BaseCalculation(JobCalculation):
         return [
             'output cif {}'.format(
                 os.path.splitext(self._DEFAULT_CIF_FILE)[0]),
-            'output str {}'.format(
-                os.path.splitext(self._DEFAULT_STR_FILE)[0]),
+            # 'output str {}'.format(
+            #     os.path.splitext(self._DEFAULT_STR_FILE)[0]),
         ]
         # 'output str <filename_no_ext>' outputs CRYSTAL98 .gui file
 

@@ -19,11 +19,14 @@
             "gulp.single = aiida_gulp.parsers.single:SingleParser"
         ]
     },
+    "scripts": [
+      "aiida_gulp/tests/mock_gulp"
+    ],
     "setup_requires": ["reentry"],
     "include_package_data": true,
     "reentry_register": true,
     "install_requires": [
-        "aiida-core>=0.12.2",
+        "aiida-core>=0.12.1",
         "six",
         "jsonextended"
     ],
