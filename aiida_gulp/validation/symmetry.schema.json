@@ -1,0 +1,70 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "symmetry settings",
+  "type": "object",
+  "required": [
+    "operations",
+    "equivalent"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "symmetry_program": {
+      "description": "the program used to generate the symmetry",
+      "type": "string"
+    },
+    "symmetry_version": {
+      "description": "the version of the program used to generate the symmetry",
+      "type": "string"
+    },
+    "computation_class": {
+      "description": "the class used to compute the settings",
+      "type": "string"
+    },
+    "computation_version": {
+      "description": "the version of the class used to compute the settings",
+      "type": "string"
+    },
+    "space_group": {
+      "description": "Space group number (international)",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 230
+    },
+    "crystal_type": {
+      "description": "The crystal type, as designated by CRYSTAL17",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 6
+    },
+    "centring_code": {
+      "description": "The crystal type, as designated by CRYSTAL17",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 6
+    },
+    "operations": {
+      "description": "symmetry operations to use (in the fractional basis)",
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "description": "each item should be a list of [r00,r10,r20,r01,r11,r21,r02,r12,r22,t0,t1,t2]",
+        "type": "array",
+        "minItems": 12,
+        "maxItems": 12,
+        "items": {
+          "type": "number",
+          "minimum": -1,
+          "maximum": 1
+        }
+      }
+    },
+    "equivalent": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      }
+    }
+  }
+}

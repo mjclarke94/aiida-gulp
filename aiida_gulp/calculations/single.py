@@ -40,7 +40,7 @@ class SingleCalculation(BaseCalculation):
         # 'prop': print properties, incl bulk/shear modulus, dielectric, refractive
         # 'linmin': print details of minimisation
         # 'comp': print intital/final geometry comparison
-        keywords = ['verb', 'operators']
+        keywords = ['verb']
 
         return keywords
 

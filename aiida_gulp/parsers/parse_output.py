@@ -106,6 +106,9 @@ def _parse_main_output(outstr, data):
             data["errors"].append(line)
             return data
 
+        if line.startswith('!! WARNING'):
+            data["warnings"].append(line)
+
         if ' '.join(fields[:4]) == '**** Optimisation achieved ****':
             data['optimised'] = True
         elif "No variables to optimise - single point performed" in line:
@@ -131,7 +134,7 @@ def _parse_main_output(outstr, data):
         elif ' '.join(fields[:4]) == 'ReaxFF : Energy contributions:':
             _extract_energy_contribs(data, lines)
 
-        # TODO Total CPU time and charges (reaxff only)
+        # TODO Total CPU time, num_opt_steps, charges (reaxff only)
 
 
 def _extract_lattice_energy_prim_only(data, fields):

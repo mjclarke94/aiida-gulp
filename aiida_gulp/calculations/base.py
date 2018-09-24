@@ -4,6 +4,8 @@ Plugin to create a GULP output file from input files created via data nodes
 import os
 from abc import abstractmethod
 
+import numpy as np
+
 from aiida.common.exceptions import InputValidationError
 from aiida.common.utils import classproperty
 from aiida.orm import JobCalculation
@@ -11,6 +13,8 @@ from aiida.orm import DataFactory
 from aiida.common.datastructures import (CalcInfo, CodeInfo)
 
 from aiida_gulp.calculations.potentials import get_potential_lines
+from aiida_gulp.geometry import CRYSTAL_TYPE_MAP
+from aiida_gulp.validation import validate_with_json
 
 StructureData = DataFactory('structure')
 ParameterData = DataFactory('parameter')
@@ -72,6 +76,16 @@ class BaseCalculation(JobCalculation):
                 'docstring':
                 "the input parameters to create the potential section of .gin file content."
             },
+            "symmetry": {
+                'valid_types':
+                ParameterData,
+                'additional_parameter':
+                None,
+                'linkname':
+                'symmetry',
+                'docstring':
+                "the input parameters to create the symmetry section of .gin file content."
+            },
             "structure": {
                 'valid_types': StructureData,
                 'additional_parameter': None,
@@ -82,14 +96,29 @@ class BaseCalculation(JobCalculation):
 
         return use_dict
 
-    def _create_input_files(self, tempfolder, parameters, potential, instruct):
+    # pylint: disable=too-many-arguments
+    def _create_input_files(self, tempfolder, parameters, potential, instruct,
+                            symmetry):
         """
 
-        :param parameters:
-        :param potential:
-        :param instruct:
+        :param tempfolder:
+        :param parameters: dict or None
+        :param potential: dict
+        :param instruct: aiida.orm.data.structure.StructureData
+        :param symmetry: dict or None
         :return:
         """
+        if not parameters:
+            parameters = {}
+        else:
+            parameters = parameters.get_dict()
+            self.validate_parameters(parameters)
+        if not symmetry:
+            symmetry = {}
+        else:
+            symmetry = symmetry.get_dict()
+            validate_with_json(symmetry, 'symmetry')
+
         filecontent = ""
 
         keywords = self.get_input_keywords(parameters)
@@ -102,11 +131,12 @@ class BaseCalculation(JobCalculation):
 
         # GEOMETRY
         filecontent += "\n# Geometry\n"
-        filecontent += "\n".join(self.get_geometry_lines(instruct))
+        filecontent += "\n".join(self.get_geometry_lines(instruct, symmetry))
 
         # FORCE FIELD
         filecontent += "\n\n# Force Field\n"
-        filecontent += "\n".join(self.get_ffield_lines(potential, instruct))
+        filecontent += "\n".join(
+            self.get_ffield_lines(potential.get_dict(), instruct))
 
         # OTHER OPTIONS
         filecontent += "\n\n# Other Options\n"
@@ -119,6 +149,9 @@ class BaseCalculation(JobCalculation):
         with open(tempfolder.get_abs_path(self._DEFAULT_INPUT_FILE), 'w') as f:
             f.write(filecontent)
 
+    def validate_parameters(self, parameters):
+        raise NotImplementedError
+
     @abstractmethod
     def get_input_keywords(self, parameters):
         """ get list of input keywords for .gin
@@ -128,13 +161,29 @@ class BaseCalculation(JobCalculation):
         """
         raise NotImplementedError
 
-    def get_geometry_lines(self, instruct):
+    def get_geometry_lines(self, instruct, symmetry):
         """ get list of geometry lines for .gin
 
         :type instruct: aiida.orm.data.structure.StructureData
+        :type symmetry: dict
         :rtype: list of str
         """
         lines = ['name main-geometry']
+
+        ops = symmetry.get('operations', [])
+        # remove identity matrix
+        ops = [
+            op for op in ops
+            if not np.allclose(op, [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0])
+        ]
+        equiv_atoms = symmetry.get('equivalent',
+                                   list(range(len(instruct.sites))))
+        crystal_type = symmetry.get('crystal_type', None)
+
+        if ops and len(equiv_atoms) != len(instruct.sites):
+            raise AssertionError(
+                'The length of equivalent atoms is not equal to the number of sites'
+            )
 
         if all(instruct.pbc):
             lines.append('vectors')
@@ -142,13 +191,37 @@ class BaseCalculation(JobCalculation):
                 lines.append("{0:.6f} {1:.6f} {2:.6f} ".format(*vector))
 
             lines.append('cartesian')
-            for site in instruct.sites:
+            all_equiv = []
+            for site, equiv in zip(instruct.sites, equiv_atoms):
+
+                # only add in-equivalent atoms
+                if equiv in all_equiv:
+                    continue
+                all_equiv.append(equiv)
+
                 kind = instruct.get_kind(site.kind_name)
-                x, y, z = site.position
                 lines.append("{0} core {1:.6f} {2:.6f} {3:.6f}".format(
-                    kind.symbol, x, y, z))
+                    kind.symbol, *site.position))
+
+            if crystal_type:
+                if isinstance(crystal_type, int):
+                    crystal_type = CRYSTAL_TYPE_MAP[crystal_type]
+                assert crystal_type in [
+                    "triclinic", "monoclinic", "orthorhombic", "tetragonal",
+                    "hexagonal", "rhombohedral", "cubic"
+                ]
+                lines.append("symmetry_cell {}".format(crystal_type))
+
+            for op in ops:
+                lines.append('symmetry_operator')
+                lines.append("{0:8.5f} {1:8.5f} {2:8.5f} {3:8.5f}".format(
+                    op[0], op[3], op[6], op[9]))
+                lines.append("{0:8.5f} {1:8.5f} {2:8.5f} {3:8.5f}".format(
+                    op[1], op[4], op[7], op[10]))
+                lines.append("{0:8.5f} {1:8.5f} {2:8.5f} {3:8.5f}".format(
+                    op[2], op[5], op[8], op[11]))
         else:
-            # For 2D use svectors and sfractional
+            # TODO For 2D use svectors and sfractional, can you specify symmetry operations?
             raise NotImplementedError('periodicity lower than 3')
 
         return lines
@@ -182,7 +255,7 @@ class BaseCalculation(JobCalculation):
             'output str {}'.format(
                 os.path.splitext(self._DEFAULT_STR_FILE)[0]),
         ]
-        # 'output str <filename_no_ext>' would output CRYSTAL .gui file
+        # 'output str <filename_no_ext>' outputs CRYSTAL98 .gui file
 
     def _prepare_for_submission(self, tempfolder, inputdict):
         """
@@ -207,33 +280,19 @@ class BaseCalculation(JobCalculation):
             raise InputValidationError("No code specified for this "
                                        "calculation")
 
-        try:
-            parameters = inputdict.pop(self.get_linkname('parameters'))
-        except KeyError:
-            raise InputValidationError("Missing parameters")
-        if not isinstance(parameters, ParameterData):
-            raise InputValidationError("parameters not of type ParameterData")
-
-        try:
-            potential = inputdict.pop(self.get_linkname('potential'))
-        except KeyError:
-            raise InputValidationError("Missing potential")
-        if not isinstance(potential, ParameterData):
-            raise InputValidationError("potential not of type ParameterData")
-
-        try:
-            instruct = inputdict.pop(self.get_linkname('structure'))
-        except KeyError:
-            raise InputValidationError("Missing structure")
-        if not isinstance(instruct, StructureData):
-            raise InputValidationError("structure not of type StructureData")
+        potential = self._pop_input(inputdict, 'potential', ParameterData)
+        instruct = self._pop_input(inputdict, 'structure', StructureData)
+        parameters = self._pop_input(
+            inputdict, 'parameters', ParameterData, allow_none=True)
+        symmetry = self._pop_input(
+            inputdict, 'symmetry', ParameterData, allow_none=True)
 
         if inputdict:
             raise InputValidationError(
                 "Unknown additional inputs: {}".format(inputdict))
 
-        self._create_input_files(tempfolder, parameters.get_dict(),
-                                 potential.get_dict(), instruct)
+        self._create_input_files(tempfolder, parameters, potential, instruct,
+                                 symmetry)
 
         # Prepare CodeInfo object for aiida, describes how a code has to be executed
         codeinfo = CodeInfo()
@@ -243,7 +302,6 @@ class BaseCalculation(JobCalculation):
         ]
         # codeinfo.stdout_name =
         codeinfo.withmpi = self.get_withmpi()
-
         # Prepare CalcInfo object for aiida
         calcinfo = CalcInfo()
         calcinfo.uuid = self.uuid
@@ -254,3 +312,16 @@ class BaseCalculation(JobCalculation):
         calcinfo.retrieve_temporary_list = list(self._retrieve_temporary_list)
 
         return calcinfo
+
+    def _pop_input(self, inputdict, name, ntype, allow_none=False):
+        try:
+            innode = inputdict.pop(self.get_linkname(name))
+        except KeyError:
+            if not allow_none:
+                raise InputValidationError("Missing {0}".format(name))
+            else:
+                return None
+        if not isinstance(innode, ntype):
+            raise InputValidationError("{0} not of type {1}".format(
+                name, ntype))
+        return innode

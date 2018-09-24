@@ -4,6 +4,7 @@ import os
 import pytest
 import sys
 from aiida_gulp.common.compatibility import aiida_version, cmp_version, run_get_node
+from aiida_gulp.geometry import get_3d_symmetric_struct
 
 from aiida_gulp.tests import TEST_DIR
 import aiida_gulp.tests.utils as tests
@@ -48,7 +49,9 @@ def reaxff_data():
         # in gulp, with standard tolerances, -42.20546311 eV
         # with a lower torsioprod tolerance (0.001), -44.57768894 eV
         "initial_energy": -42.20546311,
-        "final_energy": -43.56745651,
+        "final_energy": -47.38597959,
+        "initial_volume": 155.720872,
+        "final_volume": 165.586723,
         "infiles": ['main.gin'],
         "warnings": []
     }
@@ -72,12 +75,12 @@ def setup_calc(workdir, configure, struct_dict, potential_dict, ctype, units):
             position=np.dot(scaled_position, struct_dict["cell"]).tolist(),
             symbols=symbols)
 
+    structure, symmdata = get_3d_symmetric_struct(structure)
+
     potential = ParameterData(dict=potential_dict)
 
     if ctype == "single":
-        parameters_opt = {
-            'title': 'the title',  # optional
-        }
+        parameters_opt = None
         plugin_name = 'gulp.single'
     elif ctype == "optimisation":
         # parameters_opt = {
@@ -109,8 +112,6 @@ def setup_calc(workdir, configure, struct_dict, potential_dict, ctype, units):
         }
         plugin_name = 'gulp.optimize'
 
-    parameters = ParameterData(dict=parameters_opt)
-
     code = tests.get_code(computer, plugin_name)
     code.store()
 
@@ -123,8 +124,6 @@ def setup_calc(workdir, configure, struct_dict, potential_dict, ctype, units):
     calc.use_structure(structure)
     calc.use_potential(potential)
 
-    calc.use_parameters(parameters)
-
     input_dict = {
         "options": {
             "resources": {
@@ -136,9 +135,17 @@ def setup_calc(workdir, configure, struct_dict, potential_dict, ctype, units):
         },
         "structure": structure,
         "potential": potential,
-        "parameters": parameters,
         "code": code
     }
+
+    if parameters_opt:
+        parameters = ParameterData(dict=parameters_opt)
+        calc.use_parameters(parameters)
+        input_dict["parameters"] = parameters
+    if symmdata:
+        symmetry = ParameterData(dict=symmdata)
+        calc.use_symmetry(symmetry)
+        input_dict["symmetry"] = symmetry
 
     return calc, input_dict
 
@@ -224,7 +231,7 @@ def test_single_process(new_database_with_daemon, new_workdir, data_func):
 
     print(calcnode.get_inputs_dict())
     assert set(calcnode.get_inputs_dict().keys()).issuperset(
-        ['parameters', 'structure', 'potential'])
+        ['symmetry', 'structure', 'potential'])
 
     print(calcnode.get_outputs_dict())
     assert set(calcnode.get_outputs_dict().keys()).issuperset(
@@ -239,7 +246,8 @@ def test_single_process(new_database_with_daemon, new_workdir, data_func):
         'energy', 'warnings', 'energy_units', 'parser_class', 'parser_version'
     ])
     assert pdict['warnings'] == output_dict["warnings"]
-    assert pdict['energy'] == pytest.approx(output_dict['initial_energy'])
+    assert pdict['energy'] == pytest.approx(
+        output_dict['initial_energy'], rel=1e-3)
 
 
 @pytest.mark.lammps_call
@@ -265,7 +273,7 @@ def test_opt_process(new_database_with_daemon, new_workdir, data_func):
 
     print(calcnode.get_inputs_dict())
     assert set(calcnode.get_inputs_dict().keys()).issuperset(
-        ['parameters', 'structure', 'potential'])
+        ['parameters', 'structure', 'potential', 'symmetry'])
 
     print(calcnode.get_outputs_dict())
     assert set(calcnode.get_outputs_dict().keys()).issuperset(
@@ -281,5 +289,9 @@ def test_opt_process(new_database_with_daemon, new_workdir, data_func):
     ])
     assert pdict['warnings'] == output_dict["warnings"]
     assert pdict['energy_initial'] == pytest.approx(
-        output_dict['initial_energy'])
-    assert pdict['energy'] == pytest.approx(output_dict['final_energy'])
+        output_dict['initial_energy'], rel=1e-3)
+    assert pdict['energy'] == pytest.approx(
+        output_dict['final_energy'], rel=1e-3)
+
+    vol = calcnode.out.output_structure.get_cell_volume()
+    assert vol == pytest.approx(output_dict['final_volume'], rel=1e-3)

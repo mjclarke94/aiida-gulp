@@ -5,6 +5,7 @@ from aiida.orm import DataFactory
 
 from aiida_gulp.calculations.base import BaseCalculation
 from aiida_gulp.common.units import get_pressure
+from aiida_gulp.validation import validate_with_json
 
 StructureData = DataFactory('structure')
 ParameterData = DataFactory('parameter')
@@ -26,6 +27,14 @@ class OptCalculation(BaseCalculation):
         # parser entry point defined in setup.json
         self._default_parser = 'gulp.optimize'
 
+    def validate_parameters(self, parameters):
+        """
+
+        :type parameters: dict
+        :return:
+        """
+        validate_with_json(parameters, "optimize")
+
     def get_input_keywords(self, parameters):
         """ get list of input keywords
 
@@ -39,9 +48,7 @@ class OptCalculation(BaseCalculation):
         # 'prop': print properties, incl bulk/shear modulus, dielectric, refractive
         # 'linmin': print details of minimisation
         # 'comp': print intital/final geometry comparison
-        keywords = [
-            'optimise', 'verb', 'operators', parameters['relax']['type']
-        ]
+        keywords = ['optimise', 'verb', parameters['relax']['type']]
         if parameters['minimize']['style'] != 'nr':
             keywords.append(parameters['minimize']['style'])
 
