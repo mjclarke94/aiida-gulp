@@ -9,7 +9,7 @@ import numpy as np
 from aiida.common.exceptions import InputValidationError
 from aiida.common.utils import classproperty
 from aiida.orm import JobCalculation
-from aiida.orm import DataFactory
+from aiida.orm import DataFactory, Data
 from aiida.common.datastructures import (CalcInfo, CodeInfo)
 
 from aiida_gulp.calculations.potentials import get_potential_lines
@@ -270,10 +270,6 @@ class BaseCalculation(JobCalculation):
         developer_guide/devel_tutorial/code_plugin_qe.html#step-3-prepare-a-text-input
         for a description of its function and inputs
         """
-        # read inputs
-        # we expect "code", "parameters", "structure" and "potential"
-        # "settings" is optional
-
         try:
             code = inputdict.pop(self.get_linkname('code'))
         except KeyError:
@@ -285,7 +281,7 @@ class BaseCalculation(JobCalculation):
         parameters = self._pop_input(
             inputdict, 'parameters', ParameterData, allow_none=True)
         symmetry = self._pop_input(
-            inputdict, 'symmetry', ParameterData, allow_none=True)
+            inputdict, 'symmetry', Data, allow_none=True)
 
         if inputdict:
             raise InputValidationError(

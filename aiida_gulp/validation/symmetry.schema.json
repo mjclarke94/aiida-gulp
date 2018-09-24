@@ -61,6 +61,7 @@
       }
     },
     "equivalent": {
+      "description": "a number for each site, with the same number denoting symmetric equivalence",
       "type": "array",
       "items": {
         "type": "integer"
