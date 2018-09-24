@@ -28,7 +28,9 @@
     "install_requires": [
         "aiida-core>=0.12.1",
         "six",
-        "jsonextended"
+        "jsonextended",
+        "jsonschema",
+        "ase"
     ],
     "extras_require": {
         "testing": [
