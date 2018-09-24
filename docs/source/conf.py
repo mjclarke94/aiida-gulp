@@ -73,6 +73,11 @@ extensions = [
 intersphinx_mapping = {
     'python': ('https://docs.python.org/2.7', None),
     'aiida': ('http://aiida-core.readthedocs.io/en/latest/', None),
+    'aiida_quantumespresso':
+    ('http://aiida-quantumespresso.readthedocs.io/en/latest/', None),
+    "ase": ('https://wiki.fysik.dtu.dk/ase/', None),
+    "pathlib": ('https://pathlib.readthedocs.io/en/latest/', None),
+    "spglib": ('https://atztogo.github.io/spglib/', None)
 }
 
 nitpick_ignore = [('py:obj', 'module')]

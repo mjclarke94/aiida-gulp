@@ -52,7 +52,7 @@ install:
     cd ..;
     git clone --branch=${AIIDA_BRANCH} https://github.com/aiidateam/aiida_core.git;
     cd aiida_core;
-    pip install -U -e .[testing];
+    pip install -U -e .[testing,atomic_tools];
     cd "$cur_path";
   fi
 - pip install coveralls

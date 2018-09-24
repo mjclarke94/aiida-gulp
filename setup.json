@@ -26,12 +26,10 @@
     "include_package_data": true,
     "reentry_register": true,
     "install_requires": [
-        "aiida-core>=0.12.1",
+        "aiida-core[atomic_tools]>=0.12.1",
         "six",
         "jsonextended",
-        "jsonschema",
-        "spglib",
-        "ase"
+        "jsonschema"
     ],
     "extras_require": {
         "testing": [
