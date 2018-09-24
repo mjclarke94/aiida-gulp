@@ -14,13 +14,13 @@ class OptParser(Parser):
     """
     Parser class for parsing output of a standard GULP run
     """
+
     def __init__(self, calculation):
         """
         Initialize Parser instance
         """
         # check for valid input
-        if not isinstance(calculation,
-                          CalculationFactory('gulp.optimize')):
+        if not isinstance(calculation, CalculationFactory('gulp.optimize')):
             raise OutputParsingError(
                 "Can only parse gulp.optimize calculation")
 
@@ -116,10 +116,9 @@ class OptParser(Parser):
         else:
             cif = CifData(file=out_folder.get_abs_path(outcif_file))
             structure = cif._get_aiida_structure(primitive_cell=False)
-            node_list.append((self.get_linkname_outstructure(),
-                              structure))
+            node_list.append((self.get_linkname_outstructure(), structure))
 
-        node_list.insert(0, (self.get_linkname_outparams(),
-                             ParameterData(dict=outparams)))
+        node_list.insert(
+            0, (self.get_linkname_outparams(), ParameterData(dict=outparams)))
 
         return successful, node_list

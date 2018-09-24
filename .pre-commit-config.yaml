@@ -2,14 +2,14 @@
 # pre-commit install
 
 # modernizer: make sure our code-base is Python 3 ready
-- repo: https://github.com/python-modernize/python-modernize.git
-  sha: a234ce4e185cf77a55632888f1811d83b4ad9ef2
-  hooks:
-  - id: python-modernize
-    exclude: ^docs/
-    args:
-      - --write
-      - --nobackups
+#- repo: https://github.com/python-modernize/python-modernize.git
+#  sha: a234ce4e185cf77a55632888f1811d83b4ad9ef2
+#  hooks:
+#  - id: python-modernize
+#    exclude: ^docs/
+#    args:
+#      - --write
+#      - --nobackups
 
 - repo: local
   hooks:
@@ -28,6 +28,7 @@
     name: prospector
     description: "This hook runs Prospector: https://github.com/landscapeio/prospector"
     entry: prospector
+    exclude: '^(aiida_gulp/tests/)|(examples/)'
 
   - id: version-number
     name: Check version numbers

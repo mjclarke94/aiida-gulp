@@ -23,8 +23,8 @@ stdoutfiles = {
 }
 
 additional_files = {
-    '\xf6\t\x0e\x9f\r\xa6\t\x8ea,\xd2l\xb2\xf1\x16 ':
-    [("fe.gulp.gout", ".gout")]
+    '\xf6\t\x0e\x9f\r\xa6\t\x8ea,\xd2l\xb2\xf1\x16 ': [("fe.gulp.gout",
+                                                        ".gout")]
 }
 
 if __name__ == "__main__":

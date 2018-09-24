@@ -1,12 +1,7 @@
 """
 Plugin to create a GULP output file from input files created via data nodes
 """
-import os
-from aiida.common.exceptions import InputValidationError, ValidationError
-from aiida.common.utils import classproperty
-from aiida.orm import JobCalculation
 from aiida.orm import DataFactory
-from aiida.common.datastructures import (CalcInfo, CodeInfo)
 
 from aiida_gulp.calculations.base import BaseCalculation
 from aiida_gulp.common.units import get_pressure
@@ -31,7 +26,7 @@ class OptCalculation(BaseCalculation):
         # parser entry point defined in setup.json
         self._default_parser = 'gulp.optimize'
 
-    def get_input_keywords(self, params):
+    def get_input_keywords(self, parameters):
         """ get list of input keywords
 
         :type parameters: dict
@@ -44,9 +39,11 @@ class OptCalculation(BaseCalculation):
         # 'prop': print properties, incl bulk/shear modulus, dielectric, refractive
         # 'linmin': print details of minimisation
         # 'comp': print intital/final geometry comparison
-        keywords = ['optimise', 'verb', 'operators', params['relax']['type']]
-        if params['minimize']['style'] != 'nr':
-            keywords.append(params['minimize']['style'])
+        keywords = [
+            'optimise', 'verb', 'operators', parameters['relax']['type']
+        ]
+        if parameters['minimize']['style'] != 'nr':
+            keywords.append(parameters['minimize']['style'])
 
         # TODO switch between symmetric and non-symmetric (use settings input node like CRYSTAL)
         # if not params.get('symmetry', True):
@@ -67,13 +64,15 @@ class OptCalculation(BaseCalculation):
         # TODO set energy units: in eV by default, or can use keywords: kcal, kjmol
 
         if parameters['relax'].get('pressure', False):
-            pressure, punits = get_pressure(parameters['relax']['pressure'], parameters['units'])
+            pressure, punits = get_pressure(parameters['relax']['pressure'],
+                                            parameters['units'])
             lines.append('pressure {0:.4f} {1}'.format(pressure, punits))
         # NB: Causes energy to be replaced by enthalpy in calculations.
 
         # maximum number of optimisation steps (default 1000)
         if 'max_iterations' in parameters['minimize']:
-            lines.append('maxcyc opt {}\n'.format(parameters['minimize']['max_iterations']))
+            lines.append('maxcyc opt {}\n'.format(
+                parameters['minimize']['max_iterations']))
 
         # TODO how do these compare to tolerances from LAMMPS?
         # maximum parameter tolerance (default 0.00001)

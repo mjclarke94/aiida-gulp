@@ -54,23 +54,23 @@ class BaseCalculation(JobCalculation):
         use_dict.update({
             "parameters": {
                 'valid_types':
-                    ParameterData,
+                ParameterData,
                 'additional_parameter':
-                    None,
+                None,
                 'linkname':
-                    'parameters',
+                'parameters',
                 'docstring':
-                    "the input parameters to create the .gin file content."
+                "the input parameters to create the .gin file content."
             },
             "potential": {
                 'valid_types':
-                    ParameterData,
+                ParameterData,
                 'additional_parameter':
-                    None,
+                None,
                 'linkname':
-                    'potential',
+                'potential',
                 'docstring':
-                    "the input parameters to create the potential section of .gin file content."
+                "the input parameters to create the potential section of .gin file content."
             },
             "structure": {
                 'valid_types': StructureData,
@@ -145,7 +145,8 @@ class BaseCalculation(JobCalculation):
             for site in instruct.sites:
                 kind = instruct.get_kind(site.kind_name)
                 x, y, z = site.position
-                lines.append("{0} core {1:.6f} {2:.6f} {3:.6f}".format(kind.symbol, x, y, z))
+                lines.append("{0} core {1:.6f} {2:.6f} {3:.6f}".format(
+                    kind.symbol, x, y, z))
         else:
             # For 2D use svectors and sfractional
             raise NotImplementedError('periodicity lower than 3')
@@ -176,8 +177,10 @@ class BaseCalculation(JobCalculation):
         :rtype: list of str
         """
         return [
-            'output cif {}'.format(os.path.splitext(self._DEFAULT_CIF_FILE)[0]),
-            'output str {}'.format(os.path.splitext(self._DEFAULT_STR_FILE)[0]),
+            'output cif {}'.format(
+                os.path.splitext(self._DEFAULT_CIF_FILE)[0]),
+            'output str {}'.format(
+                os.path.splitext(self._DEFAULT_STR_FILE)[0]),
         ]
         # 'output str <filename_no_ext>' would output CRYSTAL .gui file
 
@@ -229,7 +232,8 @@ class BaseCalculation(JobCalculation):
             raise InputValidationError(
                 "Unknown additional inputs: {}".format(inputdict))
 
-        self._create_input_files(tempfolder, parameters.get_dict(), potential.get_dict(), instruct)
+        self._create_input_files(tempfolder, parameters.get_dict(),
+                                 potential.get_dict(), instruct)
 
         # Prepare CodeInfo object for aiida, describes how a code has to be executed
         codeinfo = CodeInfo()

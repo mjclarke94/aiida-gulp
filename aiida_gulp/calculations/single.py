@@ -1,15 +1,9 @@
 """
 Plugin to create a GULP output file from input files created via data nodes
 """
-import os
-from aiida.common.exceptions import InputValidationError, ValidationError
-from aiida.common.utils import classproperty
-from aiida.orm import JobCalculation
 from aiida.orm import DataFactory
-from aiida.common.datastructures import (CalcInfo, CodeInfo)
 
 from aiida_gulp.calculations.base import BaseCalculation
-from aiida_gulp.common.units import get_pressure
 
 StructureData = DataFactory('structure')
 ParameterData = DataFactory('parameter')
@@ -28,12 +22,12 @@ class SingleCalculation(BaseCalculation):
         # reuse base class function
         super(SingleCalculation, self)._init_internal_params()
 
-        self._retrieve_list = ('main.gout',)  # no cif or str
+        self._retrieve_list = ('main.gout', )  # no cif or str
 
         # parser entry point defined in setup.json
         self._default_parser = 'gulp.single'
 
-    def get_input_keywords(self, params):
+    def get_input_keywords(self, parameters):
         """ get list of input keywords
 
         :type parameters: dict

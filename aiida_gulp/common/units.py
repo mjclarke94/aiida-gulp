@@ -3,25 +3,23 @@ set unit styles that have a compatibility between LAMMPS
 """
 
 _UNITS_DICT = {
-    'real':
-        {
-            'mass': 'grams/mole',
-            'distance': 'Angstroms',
-            'time': 'femtoseconds',
-            'energy': 'Kcal/mole',
-            'velocity': 'Angstroms/femtosecond',
-            'force': 'Kcal/mole-Angstrom',
-            'torque': 'Kcal/mole',
-            'temperature': 'Kelvin',
-            'pressure': 'atmospheres',
-            'dynamic_viscosity': 'Poise',
-            'charge': 'e',  # multiple of electron charge (1.0 is a proton)
-            'dipole': 'charge*Angstroms',
-            'electric field': 'volts/Angstrom',
-            'density': 'gram/cm^dim',
-        },
+    'real': {
+        'mass': 'grams/mole',
+        'distance': 'Angstroms',
+        'time': 'femtoseconds',
+        'energy': 'Kcal/mole',
+        'velocity': 'Angstroms/femtosecond',
+        'force': 'Kcal/mole-Angstrom',
+        'torque': 'Kcal/mole',
+        'temperature': 'Kelvin',
+        'pressure': 'atmospheres',
+        'dynamic_viscosity': 'Poise',
+        'charge': 'e',  # multiple of electron charge (1.0 is a proton)
+        'dipole': 'charge*Angstroms',
+        'electric field': 'volts/Angstrom',
+        'density': 'gram/cm^dim',
+    },
     'metal': {
-
         'mass': 'grams/mole',
         'distance': 'Angstroms',
         'time': 'picoseconds',
@@ -134,6 +132,7 @@ def get_pressure(pressure, style):
         return pressure, 'Pa'
     else:
         raise ValueError('units not allowed: {}'.format(punits))
+
 
 # def get_energy(energy, style):
 #     # allowed eV, kcal, kjmol

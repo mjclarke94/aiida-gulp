@@ -266,7 +266,7 @@ def get_code(computer, plugin_name):
 
     try:
         code = Code.get_from_string('{}-{}@{}'.format(exec_name, plugin_name,
-                                                   computer.get_name()))
+                                                      computer.get_name()))
     except NotExistent:
         path = get_path_to_executable(exec_name)
         code = Code(
@@ -290,7 +290,7 @@ def get_calc_log(calcnode):
             return o.isoformat()
 
     log_string = "- Calc State:\n{0}\n- Scheduler Out:\n{1}\n- Scheduler Err:\n{2}\n- Log:\n{3}".format(
-        calcnode.get_state(),
-        calcnode.get_scheduler_output(), calcnode.get_scheduler_error(),
+        calcnode.get_state(), calcnode.get_scheduler_output(),
+        calcnode.get_scheduler_error(),
         json.dumps(get_log_messages(calcnode), default=default, indent=2))
     return log_string

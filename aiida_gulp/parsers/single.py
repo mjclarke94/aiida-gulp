@@ -14,15 +14,14 @@ class SingleParser(Parser):
     """
     Parser class for parsing output of a standard GULP run
     """
+
     def __init__(self, calculation):
         """
         Initialize Parser instance
         """
         # check for valid input
-        if not isinstance(calculation,
-                          CalculationFactory('gulp.single')):
-            raise OutputParsingError(
-                "Can only parse gulp.single calculation")
+        if not isinstance(calculation, CalculationFactory('gulp.single')):
+            raise OutputParsingError("Can only parse gulp.single calculation")
 
         super(SingleParser, self).__init__(calculation)
 
@@ -105,7 +104,7 @@ class SingleParser(Parser):
                 "the parser raised the following errors:\n{}".format(
                     "\n\t".join(perrors)))
 
-        node_list.insert(0, (self.get_linkname_outparams(),
-                             ParameterData(dict=outparams)))
+        node_list.insert(
+            0, (self.get_linkname_outparams(), ParameterData(dict=outparams)))
 
         return successful, node_list

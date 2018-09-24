@@ -13,42 +13,45 @@ import numpy as np
 
 def reaxff_data():
     # pyrite
-    cell = [[5.38, 0.000000, 0.000000],
-            [0.000000, 5.38, 0.000000],
+    cell = [[5.38, 0.000000, 0.000000], [0.000000, 5.38, 0.000000],
             [0.000000, 0.000000, 5.38]]
 
-    scaled_positions = [[0.0, 0.0, 0.0],
-                        [0.5, 0.0, 0.5],
-                        [0.0, 0.5, 0.5],
-                        [0.5, 0.5, 0.0],
-                        [0.338, 0.338, 0.338],
-                        [0.662, 0.662, 0.662],
-                        [0.162, 0.662, 0.838],
-                        [0.838, 0.338, 0.162],
-                        [0.662, 0.838, 0.162],
-                        [0.338, 0.162, 0.838],
-                        [0.838, 0.162, 0.662],
-                        [0.162, 0.838, 0.338]]
+    scaled_positions = [[0.0, 0.0, 0.0], [0.5, 0.0, 0.5], [0.0, 0.5, 0.5], [
+        0.5, 0.5, 0.0
+    ], [0.338, 0.338, 0.338], [0.662, 0.662, 0.662], [0.162, 0.662, 0.838],
+                        [0.838, 0.338, 0.162], [0.662, 0.838, 0.162],
+                        [0.338, 0.162, 0.838], [0.838, 0.162,
+                                                0.662], [0.162, 0.838, 0.338]]
 
     symbols = ['Fe'] * 4 + ['S'] * 8
 
-    struct_dict = {"cell": cell,
-                   "symbols": symbols,
-                   "scaled_positions": scaled_positions}
+    struct_dict = {
+        "cell": cell,
+        "symbols": symbols,
+        "scaled_positions": scaled_positions
+    }
 
-    reaxff_path = os.path.join(TEST_DIR, 'input_files', 'FeCrOSCH.reaxff',)
+    reaxff_path = os.path.join(
+        TEST_DIR,
+        'input_files',
+        'FeCrOSCH.reaxff',
+    )
 
-    potential_dict = {'pair_style': 'reaxff',
-                      'data': read_reaxff_file(reaxff_path)}
+    potential_dict = {
+        'pair_style': 'reaxff',
+        'data': read_reaxff_file(reaxff_path)
+    }
 
-    output_dict = {"units": "real",
-                   # in lammps -1027.9739 kcal/mole = -4301.0427976 kJ/mole = -44.577166 eV
-                   # in gulp, with standard tolerances, -42.20546311 eV
-                   # with a lower torsioprod tolerance (0.001), -44.57768894 eV
-                   "initial_energy": -42.20546311,
-                   "final_energy": -43.56745651,
-                   "infiles": ['main.gin'],
-                   "warnings": []}
+    output_dict = {
+        "units": "real",
+        # in lammps -1027.9739 kcal/mole = -4301.0427976 kJ/mole = -44.577166 eV
+        # in gulp, with standard tolerances, -42.20546311 eV
+        # with a lower torsioprod tolerance (0.001), -44.57768894 eV
+        "initial_energy": -42.20546311,
+        "final_energy": -43.56745651,
+        "infiles": ['main.gin'],
+        "warnings": []
+    }
 
     return struct_dict, potential_dict, output_dict
 
@@ -63,9 +66,11 @@ def setup_calc(workdir, configure, struct_dict, potential_dict, ctype, units):
 
     structure = StructureData(cell=struct_dict["cell"])
 
-    for scaled_position, symbols in zip(struct_dict["scaled_positions"], struct_dict["symbols"]):
-        structure.append_atom(position=np.dot(scaled_position, struct_dict["cell"]).tolist(),
-                              symbols=symbols)
+    for scaled_position, symbols in zip(struct_dict["scaled_positions"],
+                                        struct_dict["symbols"]):
+        structure.append_atom(
+            position=np.dot(scaled_position, struct_dict["cell"]).tolist(),
+            symbols=symbols)
 
     potential = ParameterData(dict=potential_dict)
 
@@ -97,7 +102,8 @@ def setup_calc(workdir, configure, struct_dict, potential_dict, ctype, units):
                 'pressure': 0.0  # optional
             },
             "minimize": {
-                'style': 'cg',  # required: one of 'nr', 'cg' or 'dfp' (Newton-Raphson with DFP Hessian updater)
+                'style':
+                'cg',  # required: one of 'nr', 'cg' or 'dfp' (Newton-Raphson with DFP Hessian updater)
                 'max_iterations': 50000  # optional
             },
         }
@@ -143,8 +149,8 @@ def setup_calc(workdir, configure, struct_dict, potential_dict, ctype, units):
 def test_single_submission(new_database, new_workdir, data_func):
     struct_dict, potential_dict, output_dict = data_func()
 
-    calc, input_dict = setup_calc(new_workdir, False,
-                                  struct_dict, potential_dict, 'single',
+    calc, input_dict = setup_calc(new_workdir, False, struct_dict,
+                                  potential_dict, 'single',
                                   output_dict['units'])
 
     from aiida.common.folders import SandboxFolder
@@ -172,8 +178,8 @@ def test_single_submission(new_database, new_workdir, data_func):
 def test_opt_submission(new_database, new_workdir, data_func):
     struct_dict, potential_dict, output_dict = data_func()
 
-    calc, input_dict = setup_calc(new_workdir, False,
-                                  struct_dict, potential_dict, 'optimisation',
+    calc, input_dict = setup_calc(new_workdir, False, struct_dict,
+                                  potential_dict, 'optimisation',
                                   output_dict['units'])
 
     from aiida.common.folders import SandboxFolder
@@ -206,8 +212,8 @@ def test_opt_submission(new_database, new_workdir, data_func):
 def test_single_process(new_database_with_daemon, new_workdir, data_func):
     struct_dict, potential_dict, output_dict = data_func()
 
-    calc, input_dict = setup_calc(new_workdir, True,
-                                  struct_dict, potential_dict, 'single',
+    calc, input_dict = setup_calc(new_workdir, True, struct_dict,
+                                  potential_dict, 'single',
                                   output_dict['units'])
 
     process = calc.process()
@@ -229,8 +235,9 @@ def test_single_process(new_database_with_daemon, new_workdir, data_func):
 
     pdict = calcnode.out.output_parameters.get_dict()
     print(pdict)
-    assert set(pdict.keys()).issuperset(
-        ['energy', 'warnings', 'energy_units', 'parser_class', 'parser_version'])
+    assert set(pdict.keys()).issuperset([
+        'energy', 'warnings', 'energy_units', 'parser_class', 'parser_version'
+    ])
     assert pdict['warnings'] == output_dict["warnings"]
     assert pdict['energy'] == pytest.approx(output_dict['initial_energy'])
 
@@ -246,8 +253,8 @@ def test_single_process(new_database_with_daemon, new_workdir, data_func):
 def test_opt_process(new_database_with_daemon, new_workdir, data_func):
     struct_dict, potential_dict, output_dict = data_func()
 
-    calc, input_dict = setup_calc(new_workdir, True,
-                                  struct_dict, potential_dict, 'optimisation',
+    calc, input_dict = setup_calc(new_workdir, True, struct_dict,
+                                  potential_dict, 'optimisation',
                                   output_dict['units'])
 
     process = calc.process()
@@ -269,8 +276,10 @@ def test_opt_process(new_database_with_daemon, new_workdir, data_func):
 
     pdict = calcnode.out.output_parameters.get_dict()
     print(pdict)
-    assert set(pdict.keys()).issuperset(
-        ['energy', 'warnings', 'energy_units', 'parser_class', 'parser_version'])
+    assert set(pdict.keys()).issuperset([
+        'energy', 'warnings', 'energy_units', 'parser_class', 'parser_version'
+    ])
     assert pdict['warnings'] == output_dict["warnings"]
-    assert pdict['energy_initial'] == pytest.approx(output_dict['initial_energy'])
+    assert pdict['energy_initial'] == pytest.approx(
+        output_dict['initial_energy'])
     assert pdict['energy'] == pytest.approx(output_dict['final_energy'])

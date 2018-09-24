@@ -67,7 +67,8 @@ _reaxff_ename_map = {
     'hb': 'Hydrogen Bond',
     'vdw': 'van der Waals',
     'coulomb': 'Coulomb',
-    'self': 'Charge Equilibration'}
+    'self': 'Charge Equilibration'
+}
 
 
 def _new_line(lines, num_lines=1):
@@ -79,17 +80,19 @@ def _new_line(lines, num_lines=1):
     return line, fields
 
 
+def _assert_true(data, condition, msg, line):
+    if not condition:
+        data["errors"].append("Parsing Error: {} for line: {}".format(
+            msg, line))
+        return False
+    return True
+
+
 def _parse_main_output(outstr, data):
 
     data["energy_units"] = "eV"
 
     lines = outstr.splitlines()
-
-    def assert_true(condition, msg, line):
-        if not condition:
-            data["errors"].append("Parsing Error: {} for line: {}".format(msg, line))
-            return False
-        return True
 
     while lines:
         line, fields = _new_line(lines)
@@ -102,12 +105,15 @@ def _parse_main_output(outstr, data):
         if line.startswith('!! ERROR'):
             data["errors"].append(line)
             return data
+
         if ' '.join(fields[:4]) == '**** Optimisation achieved ****':
             data['optimised'] = True
         elif "No variables to optimise - single point performed" in line:
             data['optimised'] = True
-            data['warnings'].append("No variables to optimise - single point performed")
-        elif ' '.join(fields[:4]) == '**** Too many failed' and len(fields) > 5:
+            data['warnings'].append(
+                "No variables to optimise - single point performed")
+        elif ' '.join(
+                fields[:4]) == '**** Too many failed' and len(fields) > 5:
             if fields[6] == 'optimise':
                 data['optimised'] = False
                 data['errors'].append(line)
@@ -117,50 +123,63 @@ def _parse_main_output(outstr, data):
                 data['errors'].append(line)
 
         elif ' '.join(fields[:4]) == 'Total lattice energy =':
-            units = ' '.join(fields[5:])
-            if not units == 'eV':
-                continue
-            energy = float(fields[4])
-
-            etype = 'initial'
-            if 'initial' in data:
-                if 'lattice_energy' in data['initial']:
-                    if 'final' not in data:
-                        data['final'] = {}
-                    etype = 'final'
-            else:
-                data['initial'] = {}
-            data[etype]['lattice_energy'] = {}
-            data[etype]['lattice_energy']['primitive'] = energy
+            _extract_lattice_energy_prim_only(data, fields)
 
         elif ' '.join(fields[:4]) == 'Total lattice energy :':
-            etype = 'initial'
-            if 'initial' in data:
-                if 'lattice_energy' in data['initial']:
-                    if not 'final' in etype:
-                        data['final'] = {}
-                    etype = 'final'
-            else:
-                data['initial'] = {}
-            data[etype]['lattice_energy'] = {}
-            line, fields = _new_line(lines)
-            if assert_true(fields[0] == 'Primitive', "expecting primitive energy", line) and \
-                    assert_true(fields[5] == 'eV', "expecting energy in eV", line):
-                data[etype]['lattice_energy']['primitive'] = float(fields[4])
-            line, fields = _new_line(lines)
-            if assert_true(fields[0] == 'Non-primitive', "expecting non-primitive energy", line) and \
-                    assert_true(fields[5] == 'eV', "expecting energy in eV", line):
-                data[etype]['lattice_energy']['conventional'] = float(fields[4])
+            _extract_lattice_energy(data, lines)
 
         elif ' '.join(fields[:4]) == 'ReaxFF : Energy contributions:':
-
-            data['energy_contributions'] = {}
-            line, fields = _new_line(lines, 2)
-            while "=" in line and "E" in line:
-                name = _reaxff_ename_map[fields[0][2:-1]]
-                if assert_true(fields[3] == 'eV',  "expecting energy in eV", line):
-                    data['energy_contributions'][name] = float(fields[2])
-                line, fields = _new_line(lines)
+            _extract_energy_contribs(data, lines)
 
         # TODO Total CPU time and charges (reaxff only)
 
+
+def _extract_lattice_energy_prim_only(data, fields):
+    """extract energy when there is only a primitive cell"""
+    units = ' '.join(fields[5:])
+    if units == 'eV':
+
+        energy = float(fields[4])
+
+        etype = 'initial'
+        if 'initial' in data:
+            if 'lattice_energy' in data['initial']:
+                if 'final' not in data:
+                    data['final'] = {}
+                etype = 'final'
+        else:
+            data['initial'] = {}
+        data[etype]['lattice_energy'] = {}
+        data[etype]['lattice_energy']['primitive'] = energy
+
+
+def _extract_lattice_energy(data, lines):
+    """extract energy when there is a primitive and conventional cell"""
+    etype = 'initial'
+    if 'initial' in data:
+        if 'lattice_energy' in data['initial']:
+            if 'final' not in etype:
+                data['final'] = {}
+            etype = 'final'
+    else:
+        data['initial'] = {}
+    data[etype]['lattice_energy'] = {}
+    line, fields = _new_line(lines)
+    if _assert_true(data, fields[0] == 'Primitive', "expecting primitive energy", line) and \
+            _assert_true(data, fields[5] == 'eV', "expecting energy in eV", line):
+        data[etype]['lattice_energy']['primitive'] = float(fields[4])
+    line, fields = _new_line(lines)
+    if _assert_true(data, fields[0] == 'Non-primitive', "expecting non-primitive energy", line) and \
+            _assert_true(data, fields[5] == 'eV', "expecting energy in eV", line):
+        data[etype]['lattice_energy']['conventional'] = float(fields[4])
+
+
+def _extract_energy_contribs(data, lines):
+    data['energy_contributions'] = {}
+    line, fields = _new_line(lines, 2)
+    while "=" in line and "E" in line:
+        name = _reaxff_ename_map[fields[0][2:-1]]
+        if _assert_true(data, fields[3] == 'eV', "expecting energy in eV",
+                        line):
+            data['energy_contributions'][name] = float(fields[2])
+        line, fields = _new_line(lines)
