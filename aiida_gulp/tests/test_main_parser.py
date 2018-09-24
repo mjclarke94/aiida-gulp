@@ -35,25 +35,25 @@ def test_parse_opt_reaxff_pyrite():
         'errors': [],
         'energy_contributions': {
             'Double-Bond Valence Angle Penalty': 0.0,
-            'Charge Equilibration': -0.26861672,
-            'Coulomb': -3.09567064,
-            'Coordination (over)': 9.9335806,
+            'Charge Equilibration': -0.35733251,
+            'Coulomb': -2.95800482,
+            'Coordination (over)': 12.16296392,
             'Conjugation': 0.0,
-            'Valence Angle': 14.85816318,
+            'Valence Angle': 13.80015008,
             'Hydrogen Bond': 0.0,
             'Valence Angle Conjugation': 0.0,
-            'Coordination (under)': 1.1e-07,
-            'Torsion': 0.79757591,
-            'Lone-Pair': 1.21245733,
-            'van der Waals': 3.23561148,
-            'Bond': -70.24055778
+            'Coordination (under)': 0.0,
+            'Torsion': 0.19158951,
+            'Lone-Pair': 1.21399426,
+            'van der Waals': 5.95617879,
+            'Bond': -77.39551881
         },
         'optimised': True,
         'warnings': [],
+        'energy': -47.38597959,
         'energy_units': 'eV',
-        'parser_class': 'test_class',
         'energy_initial': -42.20546311,
-        'energy': -43.56745651
+        'parser_class': 'test_class'
     }
 
     assert edict.diff(data, expected, np_allclose=True) == {}

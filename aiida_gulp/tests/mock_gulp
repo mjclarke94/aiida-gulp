@@ -16,21 +16,18 @@ import os
 import sys
 from shutil import copyfile
 
-import aiida_crystal17.tests as tests
+import aiida_gulp.tests as tests
 
 stdoutfiles = {
-    '\xdfE\xb8k\xadm\xeb\xc4D\xc4\xb6\x92\x8cAj\xcd': None,
-    '\xa9G\xa2b8\x9a\xd9\xb8\xcf\x1d4i\xbd(\xc3\xe2': None
+    'ec39b0c69c6ef97d2a701f86054702ee': None,
+    '57649b5ce90996cd71e233e2509068b7': None
 }
 
 additional_files = {
-    '\xdfE\xb8k\xadm\xeb\xc4D\xc4\xb6\x92\x8cAj\xcd': [
-        ("opt_reaxff_pyrite.gout", ".gout"),
-        ("opt_reaxff_pyrite.cif", ".cif")
-    ],
-    '\xa9G\xa2b8\x9a\xd9\xb8\xcf\x1d4i\xbd(\xc3\xe2': [
-        ("single_reaxff_pyrite.gout", ".gout")
-    ]
+    'ec39b0c69c6ef97d2a701f86054702ee': [("opt_reaxff_pyrite.gout", ".gout"),
+                                         ("opt_reaxff_pyrite.cif", ".cif")],
+    '57649b5ce90996cd71e233e2509068b7': [("single_reaxff_pyrite.gout",
+                                          ".gout")]
 }
 
 if __name__ == "__main__":
@@ -42,11 +39,11 @@ if __name__ == "__main__":
 
     with open(input_name + ".gin", "rb") as f:
         incontent = f.read()
-        hashkey = hashlib.md5(incontent).digest()
+        hashkey = hashlib.md5(incontent).hexdigest()
 
     if hashkey not in stdoutfiles:
-        raise IOError("contents of {0} not in hash list, content:\n{1}".format(
-            os.path.basename(input_name + ".gin"), incontent))
+        raise IOError("contents of {0} not in hash list, hashkey:\n{1}".format(
+            os.path.basename(input_name + ".gin"), hashkey))
 
     for inname, outext in additional_files.get(hashkey, []):
         src = os.path.join(test_path, "output_files", inname)
