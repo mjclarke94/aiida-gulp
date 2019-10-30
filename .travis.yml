@@ -1,4 +1,4 @@
-dist: trusty  # note rabbitmq is currently not available on xenial
+dist: xenial  # note rabbitmq is currently not available on xenial
 language: python
 
 cache: pip
