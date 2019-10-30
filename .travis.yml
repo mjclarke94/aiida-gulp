@@ -107,13 +107,13 @@ after_success:
       coveralls
   fi
 
-# deploy:
-#   - provider: pypi
-#     distributions: "sdist bdist_wheel"
-#     user: cjsewell
-#     password:
-#       secure: VCQWK8xNFFKaWOswrtlvEqn/ULz8qjy80Y5xoXjh/tQHnfqtUSHiDh7i5BeDTYepG/C4qkGLApHp2oEOs5JM2bp8QMCVz0ERsMlX8IYAs7iMA85w9rcYWUXk/EkqPC07pyoCLk7wGlSmWnjnrfWfO9Wu5i2Ys7kpiJD6/pcbnGeAuyUv7lI+giAYiDFMjX9T4Iqh2QA2hPjVz0GVqmZyh4FDxlLNJBTvySGlrr4WDjidUamK06eqNBQ6pGGUGRjbu+KNgpSOkZBrLuDJYHhxoqYYPlIGFxWtXyBA1bQxYWWnR0R2iS93TC3TKExznFKsvN/Q11vdlnH6yophJxhimlUhDJXG70cVzsAsxXgLmQtA0Mb5nDsx0lxisAffHeKYAcoSfEg9Fj906L1vH+8/9AnVBQ2sgGB/ob9PpIyvrJoYArMmoj6O/lyNuvzufs6TVUP+iY2+Se8QCwW7l+Izh74GrWBah3Zb4j8JDNLqzjG90qmEoyjMLA67NVDqzfzEIQdZ5q8By5TIJWyv9LhHdJ6Jjl9KQCWD9w9lYzVkYI9W7J7gg8bof9oTLZ9Ntl0NwBpZV3YMpDFQNMl8OP6eNWlXCE5vS2mFPR8Lwk+s1mfq1MrSYXQQKa5m3Dt4p8PzNWrDsf8/94bwR35F+jMfRKdhwRhSvAa8AhXO1y+lJoU=
-#     on:
-#       branch: master
-#       tags: true
-#       condition: $PYPI_DEPLOY = true
+deploy:
+  - provider: pypi
+    distributions: "sdist bdist_wheel"
+    user: cjsewell
+    password:
+      secure: SRUMt3dW9sepi3jYbcfc9vXxIRLPSDOFV8c2TmLbcrooocdwvgZKNyuIk5V8GnZFt1nBU+3q+w+SjaT5R3W2yYBXvUFkkkYyjRCxSByvRuECUa+4ohw5nhwffD4sSacprpBz+2e3o9zEp5jvFy6uzYZnIxjzeJzDnZM4bvVsFlHm5xZuojBVyutnEdDEDYRxA+i+L1x68mGwJK8nY086CqqbQwtJdvnP6dmi9kqqMKF5O7cIoxkY7dLP6ch4zGOn26tDAxBIsaYu8y8YpH2Gx9iiZHWTVmcnYgE205ZOh7iu5NWAnPx+1BqHr+XJh08AXLwQBSd7bKw0TRRuTIse1FlD/yFGNM2Coj2YXzUYnwiK68+4na1cieLi5rq4S9l8fzGliGOqxgT1ctGL/Uaj9PZBqte8Qoxu0eH77ZBeCj8vdlmC0atwK8pPbpMVEHcPh+9TUxXvCg9QB5eV3YkeHUJIBSAANzbGrLLpGSlROAD8TuXgZeGUiRLwWfQ3jMxfCRCjOszjdS/xHIBhP3H6vhlnXrgsY8zMMU/AG5QfVZ3YqWS8i9n5EYkr/1t0V5aa/duv7aHENzJ6PDpWvG35vpZJD2rcpGq84UULfi5pzUTba1UVsnod5xhePY+T7yDQteh9mMbHVmSJyHeImxfmYdX00OAhmmqrOxAj2FmJ2uw=
+    on:
+      branch: master
+      tags: true
+      condition: $PYPI_DEPLOY = true
