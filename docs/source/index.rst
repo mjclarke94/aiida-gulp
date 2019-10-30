@@ -5,7 +5,8 @@
 The aiida-gulp plugin for `AiiDA`_
 =======================================
 
-``aiida-gulp`` is available at http://github.com/chrisjsewell/aiida-gulp
+The AiiDA plugin for running the `GULP <http://gulp.curtin.edu.au>`__ code,
+``aiida-gulp`` is available at http://github.com/chrisjsewell/aiida-gulp.
 
 .. toctree::
    :maxdepth: 1
