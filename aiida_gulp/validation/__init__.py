@@ -1,41 +1,21 @@
-import json
-import os
-
-import jsonschema
-
-
-def read_schema(name):
-    """read and return an json schema
-
-    :return:
-    """
-    dirpath = os.path.dirname(os.path.realpath(__file__))
-    jpath = os.path.join(dirpath, "{}.schema.json".format(name))
-    with open(jpath) as jfile:
-        schema = json.load(jfile)
-    return schema
-
-
-def validate_with_json(data, name):
-    """ validate json-type data against a schema
-
-    :param data: dictionary
-    """
-    schema = read_schema(name)
-
-    validator = jsonschema.Draft4Validator
-
-    # by default, only validates lists
-    validator(schema, types={"array": (list, tuple)}).validate(data)
-
-
-def validate_with_dict(data, schema):
-    """ validate json-type data against a schema
-
-    :param data: dictionary
-    :param schema: dictionary
-    """
-    validator = jsonschema.Draft4Validator
-
-    # by default, only validates lists
-    validator(schema, types={"array": (list, tuple)}).validate(data)
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+# Copyright 2019 Chris Sewell
+#
+# This file is part of aiida-gulp.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms and conditions
+# of version 3 of the GNU Lesser General Public License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+"""Package for validating JSON objects against schemas."""
+from aiida_gulp.validation.utils import (  # noqa: F401
+    load_schema,
+    load_validator,
+    validate_against_schema,
+)

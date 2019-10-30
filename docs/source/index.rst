@@ -3,21 +3,31 @@
     :align: center
 
 The aiida-gulp plugin for `AiiDA`_
-=====================================================
+=======================================
 
 ``aiida-gulp`` is available at http://github.com/chrisjsewell/aiida-gulp
 
+.. toctree::
+   :maxdepth: 1
+   :caption: Getting Started
+   :hidden:
+
+   user_guide/get_started
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
+   :caption: Calculations
+   :hidden:
 
-   user_guide/index
-   developer_guide/index
-   API documentation <apidoc/aiida_gulp>
+   user_guide/calc_gulp
 
-If you use this plugin for your research, please cite the following work:
+.. toctree::
+   :maxdepth: 1
+   :caption: Additional
+   :hidden:
 
-.. highlights:: Author Name1, Author Name2, *Paper title*, Jornal Name XXX, YYYY (Year).
+   changelog
+   api_index
 
 If you use AiiDA for your research, please cite the following work:
 
@@ -26,10 +36,10 @@ If you use AiiDA for your research, please cite the following work:
   for computational science*, Comp. Mat. Sci 111, 218-230 (2016);
   http://dx.doi.org/10.1016/j.commatsci.2015.09.013; http://www.aiida.net.
 
-``aiida-gulp`` is released under the MIT license. 
+``aiida-gulp`` is released under the GNU Lesser General Public License.
 
-Please contact chrisj_sewell@hotmail.com for information concerning ``aiida-gulp`` and the `AiiDA mailing list <http://www.aiida.net/mailing-list/>`_ for questions concerning ``aiida``.
-
+Please contact chrisj_sewell@hotmail.com for information concerning ``aiida-gulp``
+and the `AiiDA mailing list <http://www.aiida.net/mailing-list/>`_ for questions concerning ``aiida``
 
 Indices and tables
 ==================
@@ -40,3 +50,5 @@ Indices and tables
 
 .. _AiiDA: http://www.aiida.net
 
+.. |Zenodo| image:: https://zenodo.org/badge/145867218.svg
+   :target: https://zenodo.org/badge/latestdoi/145867218

@@ -1,1 +1,6 @@
 build/
+apidoc/
+.vscode/
+*.code-workspace
+*_nbfiles/
+work_directory/
