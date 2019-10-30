@@ -1,2 +1,5 @@
+include LICENSE
+include pyproject.toml
 include setup.json
-recursive-include aiida_gulp/tests/ *
+recursive-include aiida_gulp/tests/raw_files *
+include aiida_gulp/validation/schemas/*.json

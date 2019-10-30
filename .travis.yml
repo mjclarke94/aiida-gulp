@@ -1,81 +1,119 @@
+dist: trusty  # note rabbitmq is currently not available on xenial
 language: python
-python:
-- "2.7"
 
 cache: pip
 
 services:
 - postgresql
-- rabbitmq  # required for aiida >= 1.0
-
+- rabbitmq
 
 addons:
-  postgresql: "9.5"
-
-before_install:
-# Upgrade pip setuptools and wheel
-- pip install -U pip wheel setuptools
-
-install:
-- pip install -e .[testing,docs,pre-commit]
-- reentry scan -r aiida
-- pip install coveralls
-
-env:
-  matrix:
-    - TEST_TYPE: tests
-      TEST_AIIDA_BACKEND: django
-      MOCK_EXECUTABLES: true
-      PYPI_DEPLOY: true
-    - TEST_TYPE: tests
-      TEST_AIIDA_BACKEND: sqlalchemy
-      MOCK_EXECUTABLES: true
-    - TEST_TYPE: pre-commit
-    - TEST_TYPE: docs
-      READTHEDOCS: 'True'
-  # TODO for aiida v1 test pytest is failing on setup at present (dependency version clash?)
-    - TEST_TYPE="tests" AIIDA_BRANCH="develop" TEST_AIIDA_BACKEND="django" MOCK_EXECUTABLES=true
-    - TEST_TYPE="tests" AIIDA_BRANCH="develop" TEST_AIIDA_BACKEND="sqlalchemy" MOCK_EXECUTABLES=true
+  postgresql: "10.6"
+  apt:
+    packages:
+      - graphviz
 
 matrix:
-  allow_failures:
-    - env: TEST_TYPE="tests" AIIDA_BRANCH="develop" TEST_AIIDA_BACKEND="django" MOCK_EXECUTABLES=true
-    - env: TEST_TYPE="tests" AIIDA_BRANCH="develop" TEST_AIIDA_BACKEND="sqlalchemy" MOCK_EXECUTABLES=true
+  include:
+    - python: 3.6
+      env: TEST_TYPE="pre-commit"
+    - python: 3.6
+      env: TEST_TYPE="pytest" TEST_AIIDA_BACKEND="django" PYPI_DEPLOY=true
+    - python: 2.7
+      env: TEST_TYPE="pytest" TEST_AIIDA_BACKEND="django"
+    - python: 3.6
+      env: TEST_TYPE="pytest" TEST_AIIDA_BACKEND="sqlalchemy"
+    - python: 3.6
+      env: TEST_TYPE="docs" READTHEDOCS="True"
+    - python: 3.6
+      env: TEST_TYPE="conda"
+
+  # allow_failures:
+  #   - env: TEST_TYPE="docs" READTHEDOCS="True"
 
 install:
 # Upgrade pip setuptools and wheel
-- pip install -U pip wheel setuptools
-- pip install -e .[pre-commit,testing,docs]
-- >
-  if [[ ! -z "${AIIDA_BRANCH}" ]]; then
-    cur_path="$(pwd)";
-    cd ..;
-    git clone --branch=${AIIDA_BRANCH} https://github.com/aiidateam/aiida_core.git;
-    cd aiida_core;
-    pip install -U -e .[testing,atomic_tools];
-    cd "$cur_path";
-  fi
-- pip install coveralls
+- pip install --upgrade pip wheel setuptools "reentry>=1.3"
+- pip install numpy==1.16.4 # otherwise numpy 1.17 is installed, which is incompatible with aiida-core==1.0.0b5
+- |
+    if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
+      pip install typing==3.6.6 # otherwise importlib_resources installs incompatible version for aiida-core==1.0.0b5
+    fi
+- |
+    if [[ "$TEST_TYPE" == "pre-commit" ]]; then
+      pip install -e .[code_style]
+    fi
+- |
+    if [[ "$TEST_TYPE" == "pytest" ]]; then
+      pip install "notebook<5.5"  # required by aiida-core->circus->pyzmq<17
+      pip install -e .[testing]
+      pip install coveralls
+    fi
+- |
+    if [[ "$TEST_TYPE" == "docs" ]]; then
+      pip install -e .[docs]
+      url="https://github.com/jgm/pandoc/releases/tag/2.6"
+      path=$(curl -L $url | grep -o '/jgm/pandoc/releases/download/.*-amd64\.deb')
+      downloadUrl="https://github.com$path"
+      file=${path##*/}
+      wget $downloadUrl && sudo dpkg -i $file
+    fi
+- |
+    if [[ "$TEST_TYPE" == "conda" ]]; then
+      # See https://conda.io/docs/user-guide/tasks/use-conda-with-travis-ci.html#the-travis-yml-file
+      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+      bash miniconda.sh -b -p $HOME/miniconda
+      export PATH="$HOME/miniconda/bin:$PATH"
+      hash -r
+      conda config --set always_yes yes --set changeps1 no
+      conda update -q conda
+      # Useful for debugging any issues with conda
+      conda info -a
+    fi
 
 before_script:
-- reentry scan
+- |
+    if [[ "$TEST_TYPE" == "pytest" ]] || [[ "$TEST_TYPE" == "docs" ]]; then
+      reentry scan
+    fi
 
 script:
-- >
-  if [[ "$TEST_TYPE" == "tests" ]]; then
-    if [[ ! -z "${AIIDA_BRANCH}" ]]; then
-      pytest -v aiida_gulp;
-    else
-      pytest -v --cov=aiida_gulp --cov-config .coveragerc --cov-report= aiida_gulp;
-    fi
+- |
+  if [[ "$TEST_TYPE" == "pytest" ]]; then
+      pytest -v --cov=aiida_gulp --cov=examples --cov-config .coveragerc --cov-report= aiida_gulp
   fi
-- >
+- |
   if [[ "$TEST_TYPE" == "pre-commit" ]]; then
-  pre-commit install;
-  pre-commit run --all-files || ( git status --short; git diff ; exit 1 ) ;
+    pre-commit run --all-files || ( git status --short ; git diff ; exit 1 )
   fi
-- if [[ "$TEST_TYPE" == "docs" ]]; then cd docs; make; fi
+- |
+  if [[ "$TEST_TYPE" == "docs" ]]; then
+    cd docs
+    make
+  fi
+- |
+  if [[ "$TEST_TYPE" == "conda" ]]; then
+    travis_retry conda env create -f conda_dev_env.yml -n test-environment python=$TRAVIS_PYTHON_VERSION
+    conda list -n test-environment
+    source activate test-environment
+    pip install --no-deps -e .
+    reentry scan
+    verdi data gulp.potentials --help
+  fi
 
 after_success:
-- coveralls
+- |
+  if [[ "$TEST_TYPE" == "pytest" ]]; then
+      coveralls
+  fi
 
+deploy:
+  - provider: pypi
+    distributions: "sdist bdist_wheel"
+    user: cjsewell
+    password:
+      secure: SRUMt3dW9sepi3jYbcfc9vXxIRLPSDOFV8c2TmLbcrooocdwvgZKNyuIk5V8GnZFt1nBU+3q+w+SjaT5R3W2yYBXvUFkkkYyjRCxSByvRuECUa+4ohw5nhwffD4sSacprpBz+2e3o9zEp5jvFy6uzYZnIxjzeJzDnZM4bvVsFlHm5xZuojBVyutnEdDEDYRxA+i+L1x68mGwJK8nY086CqqbQwtJdvnP6dmi9kqqMKF5O7cIoxkY7dLP6ch4zGOn26tDAxBIsaYu8y8YpH2Gx9iiZHWTVmcnYgE205ZOh7iu5NWAnPx+1BqHr+XJh08AXLwQBSd7bKw0TRRuTIse1FlD/yFGNM2Coj2YXzUYnwiK68+4na1cieLi5rq4S9l8fzGliGOqxgT1ctGL/Uaj9PZBqte8Qoxu0eH77ZBeCj8vdlmC0atwK8pPbpMVEHcPh+9TUxXvCg9QB5eV3YkeHUJIBSAANzbGrLLpGSlROAD8TuXgZeGUiRLwWfQ3jMxfCRCjOszjdS/xHIBhP3H6vhlnXrgsY8zMMU/AG5QfVZ3YqWS8i9n5EYkr/1t0V5aa/duv7aHENzJ6PDpWvG35vpZJD2rcpGq84UULfi5pzUTba1UVsnod5xhePY+T7yDQteh9mMbHVmSJyHeImxfmYdX00OAhmmqrOxAj2FmJ2uw=
+    on:
+      branch: master
+      tags: true
+      condition: $PYPI_DEPLOY = true

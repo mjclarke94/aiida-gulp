@@ -1,37 +1,67 @@
 # Install pre-commit hooks via
 # pre-commit install
 
-# modernizer: make sure our code-base is Python 3 ready
-#- repo: https://github.com/python-modernize/python-modernize.git
-#  sha: a234ce4e185cf77a55632888f1811d83b4ad9ef2
-#  hooks:
-#  - id: python-modernize
-#    exclude: ^docs/
-#    args:
-#      - --write
-#      - --nobackups
+exclude: >
+  (?x)^(
+      aiida_gulp/tests/raw_files/.*
+  )$
 
-- repo: local
-  hooks:
-  # yapf = yet another python formatter
-  - id: yapf
-    name: yapf
-    entry: yapf
-    language: system
-    types: [python]
-    args: ["-i"]
+repos:
 
-  # prospector: collection of linters
-  - id: prospector
-    language: system
-    types: [file, python]
-    name: prospector
-    description: "This hook runs Prospector: https://github.com/landscapeio/prospector"
-    entry: prospector
-    exclude: '^(aiida_gulp/tests/)|(examples/)'
+  - repo: git://github.com/pre-commit/pre-commit-hooks
+    rev: v2.2.3
+    hooks:
+    - id: check-json
+      exclude: vscode/settings\.json
+    - id: check-yaml
+    - id: end-of-file-fixer
+    - id: trailing-whitespace
+    - id: flake8
 
-  - id: version-number
-    name: Check version numbers
-    entry: python ./.travis-data/check_version.py
-    language: system
-    files: '^(setup.json)|(aiida_gulp/__init__.py)'
+  - repo: https://github.com/psf/black
+    rev: 19.3b0
+    hooks:
+    - id: black
+
+  - repo: local
+    hooks:
+
+    - id: version-number
+      name: Check version numbers
+      entry: python ./.pre-commit/check_version.py version
+      language: system
+      files: >-
+        (?x)^(
+          setup.json|
+          .pre-commit/check_version.py|
+          aiida_gulp/__init__.py
+        )$
+      pass_filenames: false
+
+    - id: conda
+      name: Create environment.yml
+      entry: python ./.pre-commit/check_version.py conda
+      language: system
+      files: >-
+        (?x)^(
+          setup.json|
+          setup.py|
+          .pre-commit/check_version.py|
+          conda_dev_env.yml|
+        )$
+      pass_filenames: false
+
+    - id: travis-linter
+      name: Travis Lint
+      entry: travis lint
+      files: .travis.yml
+      language: ruby
+      additional_dependencies: ['travis']
+
+    - id: doc8
+      entry: doc8
+      language: system
+      types: [rst]
+      name: doc8 - Lint the documentation.
+
+    # TODO could also add check-manifest

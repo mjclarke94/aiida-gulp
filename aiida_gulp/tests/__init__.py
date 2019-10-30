@@ -1,5 +1,2 @@
-""" tests for the plugin that does not pollute your profiles/databases.
-"""
-import os
-
-TEST_DIR = os.path.dirname(os.path.realpath(__file__))
+"""Tests for the plugin that does not pollute your profiles/databases."""
+from aiida_gulp.tests.resources import *  # noqa: F401,F403
