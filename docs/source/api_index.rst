@@ -1,5 +1,5 @@
-AiiDA CRYSTAL17 API
-===================
+AiiDA GULP API
+==============
 
 .. toctree::
    :maxdepth: 2
