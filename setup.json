@@ -39,7 +39,8 @@
     ],
     "gulp.potentials": [
       "reaxff = aiida_gulp.potentials.reaxff:PotentialWriterReaxff",
-      "lj =  aiida_gulp.potentials.lj:PotentialWriterLJ"
+      "lj =  aiida_gulp.potentials.lj:PotentialWriterLJ",
+      "buckingham = aiida_gulp.potentials.buckingham:PotentialWriterBuckingham"
     ]
   },
   "include_package_data": true,

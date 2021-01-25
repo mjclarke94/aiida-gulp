@@ -1,0 +1,66 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "potential.base.schema",
+    "description": "a schema for storing an empirical potential",
+    "type": "object",
+    "required": [
+        "species",
+        "2body"
+    ],
+    "properties": {
+        "description": {
+            "type": "string"
+        },
+        "species": {
+            "description": "the list of species",
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "type": "string",
+                "pattern": "^[a-zA-Z]+ (core|shell)$"
+            }
+        },
+        "2body": {
+            "description": "parameters that depend on two species",
+            "type": "object",
+            "additionalProperties": false,
+            "patternProperties": {
+                "[0-9]+\\-[0-9]+": {
+                    "description": "mapping of '<idx1>-<idx2>' to properties",
+                    "type": "object",
+                    "required": [
+                        "buck_A",
+                        "buck_rho",
+                        "buck_C",
+                        "buck_rmax"
+                    ],
+                    "properties": {
+                        "buck_A": {
+                            "description": "first coefficient (in eV)",
+                            "type": "number"
+                        },
+                        "buck_rho": {
+                            "description": "second coefficient (in Angs)",
+                            "type": "number"
+                        },
+                        "buck_C": {
+                            "description": "third coefficient (in ev*Angs**6)",
+                            "type": "number"
+                        },
+                        "buck_rmin": {
+                            "description": "minimum radius cut-off (Angs)",
+                            "type": "number",
+                            "minimum": 0,
+                            "default": 0
+                        },
+                        "buck_rmax": {
+                            "description": "maximum radius cut-off (Angs)",
+                            "type": "number",
+                            "exclusiveMinimum": 0
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
