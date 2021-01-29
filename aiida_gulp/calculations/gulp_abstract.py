@@ -23,7 +23,7 @@ from aiida.engine import CalcJob
 from aiida.plugins import DataFactory
 
 
-def potential_validator(potential):
+def potential_validator(potential, _):
     assert (
         not potential.has_fitting_flags
     ), "fitting flags should not be set for the potential"
