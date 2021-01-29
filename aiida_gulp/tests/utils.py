@@ -78,7 +78,7 @@ def get_or_create_code(entry_point, computer, executable, exec_path=None):
 
     try:
         code = Code.objects.get(
-            label="{}-{}@{}".format(entry_point, executable, computer.name)
+            label="{}-{} on {}".format(entry_point, executable, computer.name)
         )
     except NotExistent:
         if exec_path is None:
@@ -86,7 +86,7 @@ def get_or_create_code(entry_point, computer, executable, exec_path=None):
         code = Code(
             input_plugin_name=entry_point, remote_computer_exec=[computer, exec_path]
         )
-        code.label = "{}-{}@{}".format(entry_point, executable, computer.name)
+        code.label = "{}-{} on {}".format(entry_point, executable, computer.name)
         code.store()
 
     return code
