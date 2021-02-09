@@ -256,6 +256,12 @@ class InputCreationOpt(InputCreationBase):
             lines.append(
                 "maxcyc opt {}".format(parameters["minimize"]["max_iterations"])
             )
+        if "max_time" in parameters["minimize"]:
+            lines.append("time {}".format(parameters["minimize"]["max_time"]))
+
+        for tol in ["xtol", "ftol", "gtol", "gmax"]:
+            if tol in parameters["minimize"]:
+                lines.append(f"{tol} opt {parameters['minimize'][tol]}")
 
         # TODO how do these compare to tolerances from LAMMPS?
         # maximum parameter tolerance (default 0.00001)
