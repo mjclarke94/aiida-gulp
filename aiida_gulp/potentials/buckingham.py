@@ -36,7 +36,7 @@ class PotentialWriterBuckingham(PotentialWriterAbstract):
         return load_schema("fitting.buckingham.schema.json")
 
     def _make_string(self, data, fitting_data=None):
-        """write reaxff data in GULP input format
+        """write Buckingham data in GULP input format
 
         Parameters
         ----------
