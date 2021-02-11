@@ -19,11 +19,9 @@ parse the main.gout file of a GULP run and create the required output nodes
 import re
 
 from aiida_gulp import __version__
-from aiida_gulp.parsers.raw.parse_output_common import (
-    read_gulp_table,
-    read_energy_components,
-    read_reaxff_econtribs,
-)
+from aiida_gulp.parsers.raw.parse_output_common import (read_energy_components,
+                                                        read_gulp_table,
+                                                        read_reaxff_econtribs)
 
 
 def parse_file(file_obj, parser_class=None, single_point_only=False):

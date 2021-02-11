@@ -17,10 +17,10 @@ import hashlib
 import io
 
 import six
-
-from aiida_gulp.validation import validate_against_schema
-from aiida_gulp.unit_styles import get_pressure
 from aiida_gulp.parsers.raw.write_geometry import create_geometry_lines
+from aiida_gulp.potentials.common import INDEX_SEP
+from aiida_gulp.unit_styles import get_pressure
+from aiida_gulp.validation import validate_against_schema
 
 
 class InputCreationBase(object):

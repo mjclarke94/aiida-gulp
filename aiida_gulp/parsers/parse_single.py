@@ -22,7 +22,6 @@ from aiida.common import exceptions
 from aiida.engine import ExitCode
 from aiida.orm import Dict
 from aiida.parsers.parser import Parser
-
 from aiida_gulp.parsers.raw.parse_output_std import parse_file
 
 

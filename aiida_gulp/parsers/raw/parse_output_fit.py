@@ -16,7 +16,6 @@
 import re
 
 from aiida_gulp import __version__
-
 from aiida_gulp.parsers.raw.parse_output_common import read_gulp_table
 
 

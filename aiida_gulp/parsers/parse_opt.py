@@ -18,15 +18,15 @@ A parser to read output from a standard CRYSTAL17 run
 """
 import traceback
 import warnings
-from ase.io import read as ase_read
+
 from aiida.common import exceptions
 from aiida.engine import ExitCode
 from aiida.orm import Dict
 from aiida.parsers.parser import Parser
 from aiida.plugins import DataFactory
-
 from aiida_gulp.parsers.raw.parse_output_std import parse_file
 from aiida_gulp.parsers.raw.write_geometry import validate_1d_geometry
+from ase.io import read as ase_read
 
 
 class GulpOptParser(Parser):

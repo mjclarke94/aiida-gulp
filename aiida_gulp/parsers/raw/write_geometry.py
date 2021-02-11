@@ -14,9 +14,8 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Lesser General Public License for more details.
 import numpy as np
-
-from aiida_gulp.symmetry import convert_structure, operation_cart_to_frac
-from aiida_gulp.symmetry import get_crystal_type_name
+from aiida_gulp.symmetry import (convert_structure, get_crystal_type_name,
+                                 operation_cart_to_frac)
 from aiida_gulp.validation import validate_against_schema
 
 

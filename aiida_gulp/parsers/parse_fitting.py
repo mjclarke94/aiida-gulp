@@ -23,9 +23,8 @@ from aiida.common import exceptions
 from aiida.engine import ExitCode
 from aiida.orm import Dict
 from aiida.parsers.parser import Parser
-
-from aiida_gulp.parsers.raw.parse_output_fit import parse_file
 from aiida_gulp.data.potential import EmpiricalPotential
+from aiida_gulp.parsers.raw.parse_output_fit import parse_file
 
 
 class GulpFittingParser(Parser):
