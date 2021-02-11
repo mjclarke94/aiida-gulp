@@ -34,7 +34,7 @@ from aiida_gulp.parsers.raw.write_input_fitting import create_input_lines
 
 
 class GulpFittingCalculation(CalcJob):
-    """ a calculation plugin to perform fitting of potentials,
+    """a calculation plugin to perform fitting of potentials,
     given a set of structures and observables
     """
 
@@ -48,7 +48,7 @@ class GulpFittingCalculation(CalcJob):
 
     @classproperty
     def settings_schema(cls):
-        """ return the settings schema,
+        """return the settings schema,
         which is loaded from file the first time it is called only"""
         if cls._settings_schema is None:
             cls._settings_schema = load_schema("fitting_settings.schema.json")
