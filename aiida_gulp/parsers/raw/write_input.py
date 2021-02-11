@@ -226,7 +226,7 @@ class InputCreationOpt(InputCreationBase):
         validate_against_schema(parameters, "gulp_optimize.schema.json")
 
     def get_input_keywords(self, parameters):
-        keywords = ["optimise", "verb", parameters["relax"]["type"]]
+        keywords = ["optimise", parameters["relax"]["type"]]
         if parameters["minimize"]["style"] != "nr":
             keywords.append(parameters["minimize"]["style"])
 
