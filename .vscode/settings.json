@@ -14,7 +14,7 @@
         "**/.eggs": true
     },
 
-    "python.pythonPath": "/anaconda/envs/aiida_crystal17/bin/python",
+    "python.pythonPath": "/Users/matt/.pyenv/shims/python",
     "python.formatting.provider": "black",
     "python.linting.pylintEnabled": false,
     "python.linting.flake8Enabled": true,
