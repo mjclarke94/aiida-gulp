@@ -199,7 +199,7 @@ class InputCreationBase(object):
 
     @staticmethod
     def get_geometry_lines(structure_data, symmetry_data=None):
-        """ create list of lines for geometry section of .gin
+        """create list of lines for geometry section of .gin
 
         Parameters
         ----------
