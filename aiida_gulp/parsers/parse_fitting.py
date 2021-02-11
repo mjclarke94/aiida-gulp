@@ -98,7 +98,7 @@ class GulpFittingParser(Parser):
         return ExitCode()
 
     def extract_from_dump(self, output_folder):
-        """ extract a potential from a dump file:
+        """extract a potential from a dump file:
 
         we need to invoke the `read_existing` method
         from the corresponding `gulp.potentials` entry point class

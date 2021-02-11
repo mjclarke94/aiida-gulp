@@ -203,7 +203,7 @@ def parse_file(file_obj, parser_class=None):
 
 
 def assess_species(value):
-    """ some table finish with 'Parameter Type'  'Species',
+    """some table finish with 'Parameter Type'  'Species',
     Species can be either:
 
     - 0 for 'Energy shift'
