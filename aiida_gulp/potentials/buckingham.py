@@ -90,6 +90,14 @@ class PotentialWriterBuckingham(PotentialWriterAbstract):
 
             lines.append(" ".join(species) + " " + values_string)
 
+        for index in sorted(data["charges"]):
+            lines.append('species')
+
+            species = data["species"][int(index)]
+            charge = data["charges"][index]
+            chargestring = f"{species:7s} {charge}"
+
+            lines.append(chargestring)                
         return PotentialContent("\n".join(lines), total_flags, num_fit)
 
     def read_exising(self, lines):
