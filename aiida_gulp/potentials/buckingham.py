@@ -97,7 +97,7 @@ class PotentialWriterBuckingham(PotentialWriterAbstract):
             charge = data["charges"][index]
             chargestring = f"{species:7s} {charge}"
 
-            lines.append(chargestring)                
+            lines.append(chargestring)
         return PotentialContent("\n".join(lines), total_flags, num_fit)
 
     def read_exising(self, lines):
