@@ -275,3 +275,62 @@ class InputCreationOpt(InputCreationBase):
         # gmax opt 0.01
 
         return lines
+
+
+class InputCreationMC(InputCreationBase):
+    def validate_parameters(self, parameters):
+        validate_against_schema(parameters, "gulp_mc.schema.json")
+
+    def get_input_keywords(self, parameters):
+
+        if "relax" in parameters:
+            relaxtype = parameters["relax"].get("type", "conp")
+        else:
+            relaxtype = "conp"
+
+        keywords = ["noopt", relaxtype, "montecarlo"]
+        # if parameters["minimize"]["style"] != "nr":
+        #     keywords.append(parameters["minimize"]["style"])
+
+        # TODO set energy units: eV by default, or use keywords: kcal, kjmol
+
+        # TODO switch between symmetric and non-symmetric
+        # if not params.get('symmetry', True):
+        #     # Switches off symmetry after generating unit cell
+        #     keywords.append('nosymmetry')
+        #  	'full' keyword causes the nosymmetry keyword to produce the full,
+        # instead of the primitive, unit cell.
+
+        return keywords
+
+    def get_other_option_lines(self, parameters):
+        lines = []
+
+        lines.append("# Monte Carlo")
+
+        if "temperature" in parameters["mc"]:
+            temperature = parameters["mc"]["temperature"].get("value", 0)
+        else:
+            temperature = 0
+        lines.append(f"temperature {temperature}")
+
+        mctrial = parameters["mc"].get("mctrial", 0)
+        lines.append(f"mctrial {mctrial}")
+
+        which = parameters["mc"].get("which", "only")
+
+        lines.append("mcmove {}".format(parameters["mc"].get("mcmove", 0)))
+
+        for pair, config in parameters["mc"]["swaps"].items():
+            species = [
+                "{:7s}".format(parameters["mc"]["species"][int(i)])
+                for i in pair.split(INDEX_SEP)
+            ]
+            probability = config.get("probability", 1)
+            npair = config.get("npair", 1)
+
+            lines.append(
+                f"mcswap {which} {probability} {npair} {species[0]:2s} {species[1]:2s}"
+            )
+
+        return lines

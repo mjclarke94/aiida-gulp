@@ -1,0 +1,121 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Data required for Monte Carlo simulation",
+  "type": "object",
+  "required": [
+    "mc"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "units": {
+      "type": "string",
+      "enum": [
+        "real",
+        "metal"
+      ]
+    },
+    "relax": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "conp",
+            "conv",
+            "cellonly"
+          ],
+        "default": "conp"
+        }
+      }
+    },
+    "mc": {
+      "type": "object",
+      "required": [
+        "swaps",
+        "species"
+      ],
+      "properties": {
+        "temperature": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "number",
+              "default": 0
+            },
+            "units": {
+              "type": "string",
+              "enum": [
+                "K",
+                "C",
+                "F"
+              ],
+              "default": "K"
+            }
+          }
+        },
+        "mctrial": {
+          "description": "Specifies the total number of attempted trial operations in a Monte Carlo simulation.",
+          "type": "integer",
+          "minimum": 0,
+          "default": 0
+        },
+        "mcmove":{
+          "description": "Specifies the relative probability of an atom being translated during a Monte Carlo simulation.",
+          "type": "number",
+          "default": 0,
+          "minimum": 0
+        },
+        "mcoutfreq": {
+          "description": "Specifies the frequency for printing the running averages to the output.",
+          "type": "integer",
+          "default": 100
+        },
+        "species": {
+          "description": "Types of species to be swapped in a Monte Carlo simulation",
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-zA-Z]+$"
+          }
+        },
+        "which": {
+          "description": "Specifies whether any species may be swapped or only those with probabilities supplied.",
+          "type": "string",
+          "enum": [
+            "any",
+            "only"
+          ],
+          "default": "only"
+        },
+        "swaps": {
+          "description": "List of Monte Carlo swap types",
+          "type": "object",
+          "additionalProperties": false,
+          "patternProperties": {
+            "[0-9]+\\-[0-9]+": {
+              "description": "mapping of '<idx1>-<idx2>' to valid swaps",
+              "type": "object",
+              "properties": {
+                "probability": {
+                  "description": "Specifies the relative probability of ions being swapped during a Monte Carlo simulation.",
+                  "type": "number",
+                  "minimum": 0,
+                  "default": 1
+                },
+                "npair": {
+                  "description": "Number of pairs of atoms to be swapped as part of a single attempted move",
+                  "type": "integer",
+                  "default": 1
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

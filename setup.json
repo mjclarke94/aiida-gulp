@@ -25,12 +25,14 @@
     "aiida.calculations": [
       "gulp.single = aiida_gulp.calculations.gulp_single:GulpSingleCalculation",
       "gulp.optimize = aiida_gulp.calculations.gulp_optimize:GulpOptCalculation",
-      "gulp.fitting = aiida_gulp.calculations.gulp_fitting:GulpFittingCalculation"
+      "gulp.fitting = aiida_gulp.calculations.gulp_fitting:GulpFittingCalculation",
+      "gulp.mc = aiida_gulp.calculations.gulp_mc:GulpMCCalculation"
     ],
     "aiida.parsers": [
       "gulp.single = aiida_gulp.parsers.parse_single:GulpSingleParser",
       "gulp.optimize = aiida_gulp.parsers.parse_opt:GulpOptParser",
-      "gulp.fitting = aiida_gulp.parsers.parse_fitting:GulpFittingParser"
+      "gulp.fitting = aiida_gulp.parsers.parse_fitting:GulpFittingParser",
+      "gulp.mc = aiida_gulp.parsers.parse_mc:GulpMCParser"
     ],
     "aiida.workflows": [
     ],
