@@ -19,13 +19,15 @@ parse the main.gout file of a GULP run and create the required output nodes
 import re
 
 from aiida_gulp import __version__
-from aiida_gulp.parsers.raw.parse_output_common import (read_energy_components,
-                                                        read_gulp_table,
-                                                        read_reaxff_econtribs)
+from aiida_gulp.parsers.raw.parse_output_common import (
+    read_energy_components,
+    read_gulp_table,
+    read_reaxff_econtribs,
+)
 
 
 def parse_file(file_obj, parser_class=None, single_point_only=False):
-    """ parse a file resulting from a GULP single energy or `optimise` run,
+    """parse a file resulting from a GULP single energy or `optimise` run,
     where one structure (configuration) has been supplied
     """
     content = file_obj.read()
@@ -163,9 +165,11 @@ def parse_file(file_obj, parser_class=None, single_point_only=False):
 
             if line.strip().startswith("Components of energy :"):
                 try:
-                    output["final_energy"], output[
-                        "final_primitive_energy"
-                    ], lineno = read_energy_components(lines, lineno)
+                    (
+                        output["final_energy"],
+                        output["final_primitive_energy"],
+                        lineno,
+                    ) = read_energy_components(lines, lineno)
                 except (IOError, ValueError) as err:
                     output["parser_errors"].append(str(err))
                 continue
